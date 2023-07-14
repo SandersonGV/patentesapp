@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Potentes App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background:
+                radial-gradient(black 15%, transparent 16%) 0 0,
+                radial-gradient(black 15%, transparent 16%) 8px 8px,
+                radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 0 1px,
+                radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 8px 9px;
+            background-color: #282828;
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container px-5 my-5">
+        <div class="row justify-content-center">
+            <div class="text-uppercase text-light text-center fs-1">Potentes.App</div>
+            <div class="col-lg-10">
+                <div class="card border-0 rounded-3 shadow-lg">
+                    <div class="card-body p-4">
+                        {{{body}}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        })
+
+        function showMessageToast(icon, title) {
+            Toast.fire({
+                icon: icon,
+                title: title
+            })
+        }
+
+        async function ShowQuestion(title) {
+            let result = await Swal.fire({
+                title: title,
+                showCancelButton: true,
+                confirmButtonText: 'Ok',
+            })
+
+            return result.isConfirmed;
+        }
+
+        async function ShowMessage(icon, title, text) {
+            let result = await Swal.fire({
+                title: title,
+                icon: icon,
+                html: text,
+            })
+
+            return result;
+        }
+
+        function validaOjeto(objeto) {
+            const propriedadesVazias = [];
+            for (let propriedade in objeto) {
+                if (!objeto[propriedade]) {
+                    const mensagem = `${propriedade} deve ser preenchida`;
+                    propriedadesVazias.push(mensagem);
+                }
+            }
+            return propriedadesVazias;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+<div id="gruposapp">
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Grupo</h2>
+        <div>
+            <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
+        </div>
+    </div>
+    <div><span class="fw-semibold">Data:</span> \{{new Date(grupo.data).toLocaleDateString()}}</div>
+    <div><span class="fw-semibold">Dinamica:</span> \{{grupo.dinamica}}</div>
+    <div><span class="fw-semibold">Jogo:</span> \{{grupo.jogo}}</div>
+    <div><span class="fw-semibold">Cliente:</span> \{{grupo.cliente}}</div>
+    <div><span class="fw-semibold">Monitor:</span> \{{grupo.monitor}}</div>
+
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Participantes</h2>
+        <div>
+            <button @click="openParicipanteModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i>
+                Participante</button>
+        </div>
+    </div>
+    <table class="table mt-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Email</th>
+                <th scope="col">Respostas</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item,index in grupo.participantes" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.nome}}</td>
+                <td>\{{item.email}}</td>
+                <td>\{{item?.respostas?item.respostas.length:0}}</td>
+                <td>
+                    <a :href="'/potentes/participante/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
+                            class="bi bi-eye"></i></a>
+                    <button @click="removeParticipante(item.id)" type="button" class="btn btn-danger btn-sm"><i
+                            class="bi bi-trash"></i></button>
+                    <button @click="copiarLinkResposta(item.email)" type="button" class="btn btn-success btn-sm"><i
+                            class="bi bi-link-45deg"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-grid gap-2">
+        <a href="/potentes/desafio/emgrupo/{{grupoId}}" type="button" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-box-arrow-up-right"></i> Iniciar desafio gerenciado</a>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="addParticipante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel">incluir participante</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="participante.nome"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Nome</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" v-model="participante.email"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Email</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i>
+                        Cancelar</button>
+                    <button type="button" @click="saveParticipante" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#gruposapp',
+        data: {
+            loadingPage: true,
+            grupo: [],
+            participante: {nome:"",email:""},
+            addParticipanteModal: {}
+
+        },
+        methods: {
+            async loadPage() {
+                const result = await fetch(`/potentes/grupo/getOne/{{grupoId}}`)
+                const data = await result.json()
+                this.grupo = data;
+            },
+            async openParicipanteModal() {
+                this.participante = {nome:"",email:""}
+                this.addParticipanteModal = new bootstrap.Modal('#addParticipante')
+                this.addParticipanteModal.show()
+            },
+            async saveParticipante() {
+                let validaResult = validaOjeto(this.participante);
+
+                if(validaResult.length>0){
+                    ShowMessage("warning","Campos obrigatórios",validaResult.join("<br>"))
+                    return
+                }
+
+                const result = await fetch(`/potentes/grupo/addParticipante/{{grupoId}}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: this.participante }),
+                });
+                if (result.ok) {
+                    const data = await result.json()
+                    await this.loadPage();
+                    this.participante = {}
+                    this.addParticipanteModal.hide()
+                    showMessageToast('success','participante adicionado!')
+
+                }
+            },
+            async copiarLinkResposta(email){
+                await navigator.clipboard.writeText(`${location.host}/potentes/desafio/${this.grupo.id}/${email}`)
+                showMessageToast('success','Link copiado!')
+
+            },
+            async removeParticipante(id) {
+                let questionResult = await ShowQuestion("Deseja realmente remover este grupo?");
+                if (!questionResult)
+                    return
+
+                const result = await fetch(`/potentes/participante/remove/${this.grupo.id}/${id}`);
+                if (result.ok) {
+                    this.loadPage();
+                    showMessageToast('success', 'participante removido!')
+                }
+            },
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>

@@ -1,0 +1,168 @@
+<div id="gruposapp">
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Lista de Grupos</h2>
+        <div>
+            <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Grupo</button>
+        </div>
+    </div>
+
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data</th>
+                <th scope="col">Dinamica</th>
+                <th scope="col">Jogo</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Monitor</th>
+                <th scope="col">Qtd participantes</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item,index in grupos" :key="index">
+                <th scope="row">\{{item.id}}</th>
+                <td>\{{item.data}}</td>
+                <td>\{{item.dinamica}}</td>
+                <td>\{{item.jogo}}</td>
+                <td>\{{item.cliente}}</td>
+                <td>\{{item.monitor}}</td>
+                <td>\{{item?.participantes ? item.participantes.length:0}}</td>
+                <td>
+                    <a :href="'/potentes/grupo/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
+                            class="bi bi-eye"></i></a>
+                    <button @click="removeGrupo(item.id)" type="button" class="btn btn-danger btn-sm"><i
+                            class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addGrupo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Novo grupo</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" v-model="novoGrupo.data">
+                        <label class="text-capitalize">data</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select class="form-select" v-model="novoGrupo.dinamica">
+                            <option selected>Selecione um dinamica</option>
+                            <option v-for="item,index in dinamicas" :key="index"  :value="item.nome">\{{item.nome}}</option>
+                        </select>
+                        <label class="text-capitalize">dinamica</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select class="form-select" v-model="novoGrupo.jogo">
+                            <option selected>Selecione um jogo</option>
+                            <option v-for="item,index in dinamicas.find(o => o.nome == novoGrupo.dinamica)?.jogos||[]" :key="index"  :value="item">\{{item}}</option>
+                        </select>
+                        <label class="text-capitalize">jogo</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="novoGrupo.cliente">
+                        <label class="text-capitalize">cliente</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="novoGrupo.monitor">
+                        <label class="text-capitalize">monitor</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i>
+                        Cancelar</button>
+                    <button type="button" @click="saveGrupo" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#gruposapp',
+        data: {
+            loadingPage: true,
+            grupos: [],
+            dinamicas: [],
+            novoGrupo:{data:"",dinamica:"",jogo:"",cliente:"",monitor:""},
+            addGrupoModal: {},
+        },
+        methods: {
+            async loadPage() {
+                await Promise.all([ this.getGrupos(),  this.getDinamicas()])
+            },
+            async getGrupos() {
+                const result = await fetch(`/potentes/grupo/getAll`)
+                const data = await result.json()
+                this.grupos = data;
+            },
+            async getDinamicas() {
+                const result = await fetch(`/potentes/grupo/getDinamicas`)
+                const data = await result.json()
+                this.dinamicas = data;
+            },
+            async openGrupoModal() {
+                this.novoGrupo = {data:"",dinamica:"",jogo:"",cliente:"",monitor:""}
+                this.addGrupoModal = new bootstrap.Modal('#addGrupo')
+                this.addGrupoModal.show()
+            },
+            async removeGrupo(grupoId) {
+                let questionResult = await ShowQuestion("deseja realmente remover este grupo?");
+                if (!questionResult)
+                    return
+
+                const result = await fetch(`/potentes/grupo/remove/${grupoId}`);
+                if (result.ok) {
+                    this.loadPage();
+                    showMessageToast('success', 'Grupo removido!')
+
+                }
+            },
+            async saveGrupo() {
+                let validaResult = validaOjeto(this.novoGrupo);
+
+                if(validaResult.length>0){
+                    ShowMessage("warning","Campos obrigatórios",validaResult.join("<br>"))
+                    return
+                }
+                const result = await fetch(`/potentes/grupo/addGrupo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: this.novoGrupo }),
+                });
+                if (result.ok) {
+                    const data = await result.json()
+                    this.grupos = data;
+                    this.novoGrupo = {}
+                    this.addGrupoModal.hide()
+                    showMessageToast('success','Grupo adicionado!')
+
+                }
+            },
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>

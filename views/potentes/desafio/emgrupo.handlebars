@@ -1,0 +1,101 @@
+<div id="desafioapp">
+    <div class="mb-3" v-for="item,idx in desafioList" :key="idx" v-show="idx==currentStep">
+        <h2 class="form-label d-block">Desafio \{{idx+1}}</h2>
+        <div class="list-group">
+            <div v-for="participante,idx3 in participantes" :key="idx3"
+                class="list-group-item d-flex justify-content-between align-items-center">
+                <div>\{{participante.nome}}</div>
+                <div>
+                    <div class="form-check mt-3 form-check-inline" v-for="item2,idx2 in item" :key="idx2">
+                        <input class="form-check-input" :id="participante.nome+participante.id+''+item2+(idx+1)" type="radio"
+                            :name="'desafio'+participante.nome+(idx+1)+''+participante.id" :value="item2"
+                            v-model="participante.respostas[idx]" />
+                        <label class="form-check-label" :for="participante.nome+participante.id+''+item2+(idx+1)">\{{item2}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-grid gap-2 mt-3">
+            <button v-if="currentStep==configDesafio.quantidadeDesafios-1" class="btn btn-primary btn-sm" type="button"
+                @click="enviarResposta">Enviar</button>
+            <button v-else class="btn btn-primary btn-sm" type="button" @click="proximoDesafio">Proximo</button>
+        </div>
+    </div>
+
+    \{{participantes}}
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#desafioapp',
+        data: {
+            loadingPage: true,
+            configDesafio: {
+                quantidadeDesafios: 5,
+                respostas: ["A", "B", "C", "D"]
+            },
+            desafioList: [],
+            participantes: [],
+            grupo: {},
+            currentStep: 0
+        },
+        methods: {
+            async loadPage() {
+                await this.getGrupo();
+                for (let i = 0; i < this.configDesafio.quantidadeDesafios; i++) {
+                    let item = {};
+                    this.desafioList.push(this.configDesafio.respostas);
+                }
+
+                let objetoArmazenado = localStorage.getItem('dataResposta{{grupoId}}');
+                if (objetoArmazenado !== null) {
+                    const { participantes, currentStep } = JSON.parse(objetoArmazenado);
+                    this.participantes = participantes;
+                    this.currentStep = currentStep;
+                }
+            },
+            async getGrupo() {
+                const result = await fetch(`/potentes/participante/getAll/{{grupoId}}`)
+                const data = await result.json()
+                this.participantes = data.map(o => {
+                    o.respostas = []
+                    return o
+                });
+            },
+            async proximoDesafio() {
+                let isvalid = this.participantes.filter(o => !o.respostas[this.currentStep])
+                if (isvalid.length > 0) {
+                    showMessageToast('warning', 'preencha uma das opções')
+                    return
+                }
+                this.currentStep++;
+                localStorage.setItem('dataResposta{{grupoId}}', JSON.stringify({ participantes: this.participantes, currentStep: this.currentStep }))
+            },
+            async enviarResposta() {
+                let isvalid = this.participantes.filter(o => !o.respostas[this.currentStep])
+                if (isvalid.length > 0) {
+                    showMessageToast('warning', 'preencha uma das opções')
+                    return
+                }
+                const result = await fetch(`/potentes/desafio/addRespostaGrupo/{{grupoId}}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ participantes: this.participantes }),
+                });
+                if (result.ok) {
+                    localStorage.removeItem('dataResposta{{grupoId}}');
+                    location.replace("/potentes/grupo/detail/{{grupoId}}")
+
+                }
+            },
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>

@@ -1,0 +1,80 @@
+<div id="desafioapp">
+    <div class="mb-3" v-for="item,idx in desafioList" :key="idx" v-show="idx==currentStep">
+        <h2 class="form-label d-block">Desafio \{{idx+1}}</h2>
+        <div class="form-check mt-3" v-for="item2,idx2 in item" :key="idx2">
+            <input class="form-check-input" :id="item2+(idx+1)" type="radio" :name="'desafio'+(idx+1)" :value="item2"
+                v-model="respostas[idx]" />
+            <label class="form-check-label" :for="item2+(idx+1)">\{{item2}}</label>
+        </div>
+        <div class="d-grid gap-2 mt-3">
+            <button v-if="currentStep==configDesafio.quantidadeDesafios-1" class="btn btn-primary btn-sm" type="button"
+                @click="enviarResposta">Enviar</button>
+            <button v-else class="btn btn-primary btn-sm" type="button" @click="proximoDesafio">Proximo</button>
+        </div>
+    </div>
+
+    \{{respostas}}
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#desafioapp',
+        data: {
+            loadingPage: true,
+            configDesafio: {
+                quantidadeDesafios: 5,
+                respostas: ["A", "B", "C", "D"]
+            },
+            desafioList: [],
+            respostas: [],
+            currentStep: 0
+        },
+        methods: {
+            async loadPage() {
+                for (let i = 0; i < this.configDesafio.quantidadeDesafios; i++) {
+                    let item = {};
+                    this.desafioList.push(this.configDesafio.respostas);
+                }
+
+                let objetoArmazenado = localStorage.getItem('dataResposta');
+                if (objetoArmazenado !== null) {
+                    const { resposta, currentStep } = JSON.parse(objetoArmazenado);
+                    this.respostas = resposta;
+                    this.currentStep = currentStep;
+                }
+            },
+            async proximoDesafio() {
+                if (!this.respostas[this.currentStep]) {
+                    showMessageToast('warning', 'preencha uma das opções')
+                    return
+                }
+                this.currentStep++;
+                localStorage.setItem('dataResposta', JSON.stringify({ resposta: this.respostas, currentStep: this.currentStep }))
+            },
+            async enviarResposta() {
+                if (!this.respostas[this.currentStep]) {
+                    showMessageToast('warning', 'preencha uma das opções')
+                    return
+                } 
+                const result = await fetch(`/potentes/desafio/addResposta/{{grupoId}}/{{email}}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ resposta: this.respostas }),
+                });
+                if (result.ok) {
+                   localStorage.removeItem('dataResposta');
+                    location.replace("/potentes/concluido")
+
+                }
+            },
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>
