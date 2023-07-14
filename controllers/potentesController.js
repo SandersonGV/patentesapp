@@ -3,6 +3,7 @@ const GrupoService = require('../services/GrupoService');
 const ParticipanteService = require('../services/ParticipanteService');
 const DinamicaService = require('../services/DinamicaService');
 const RespostaService = require('../services/RespostaService');
+const AnaliseService = require('../services/AnaliseService');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -16,6 +17,11 @@ router.get('/grupo', async (req, res) => {
 router.get('/grupo/detail/:grupoId', async (req, res) => {
   let { grupoId } = req.params
   res.render('potentes/grupo/detail', { grupoId });
+});
+
+router.get('/participante/detail/:participanteId', async (req, res) => {
+  let { participanteId } = req.params
+  res.render('potentes/participante/index', { participanteId });
 });
 
 router.post('/grupo/addGrupo', async (req, res) => {
@@ -45,7 +51,14 @@ router.get('/participante/remove/:grupoId/:participanteId', async (req, res) => 
 
 router.get('/participante/getAll/:grupoId', async (req, res) => {
   let { grupoId } = req.params
-  let data = await await ParticipanteService.getAll(grupoId)
+  let data = await ParticipanteService.getAll(grupoId)
+  res.json(data)
+});
+
+router.get('/participante/getOne/:participanteId', async (req, res) => {
+  let { participanteId } = req.params
+  let data = await ParticipanteService.getOneById(participanteId)
+  data.respostas = await RespostaService.getOne(data.id)
   res.json(data)
 });
 
@@ -59,6 +72,11 @@ router.get('/grupo/getAll', async (req, res) => {
 
 router.get('/grupo/getDinamicas', async (req, res) => {
   let data = await DinamicaService.getAll();
+  res.json(data)
+});
+
+router.get('/participante/getAnalise', async (req, res) => {
+  let data = await AnaliseService.getAll();
   res.json(data)
 });
 
@@ -86,7 +104,7 @@ router.get('/desafio/emgrupo/:grupoId', async (req, res) => {
 
 router.get('/desafio/:grupoId/:email', async (req, res) => {
   let { grupoId, email } = req.params
-  let participante = await PotenteGrupoService.getParticipante(grupoId, email);
+  let participante = await ParticipanteService.getOne(grupoId, email);
 
   if (participante) {
     res.render('potentes/desafio/index', { grupoId, email });
@@ -99,7 +117,8 @@ router.post('/desafio/addResposta/:grupoId/:email', async (req, res) => {
   let { grupoId, email } = req.params
   let { resposta } = req.body;
   try {
-    await ParticipanteService.addResposta(grupoId, email, resposta);
+    let participante = await ParticipanteService.getOne(grupoId, email);
+    await RespostaService.addResposta(participante.id, resposta);
     res.json({ sucess: true });
   } catch (error) {
     res.status(400).json("erro ao salvar");
