@@ -1,3 +1,92 @@
-<div class="list-group">
-  <a href="/potentes/grupo" class="list-group-item list-group-item-action list-group-item-success">Grupos</a>
+<style>
+  .login {
+  min-height: 80vh;
+}
+
+.bg-image {
+  background-image: url('https://source.unsplash.com/WEQbe2jBg40/600x1200');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-heading {
+  font-weight: 300;
+}
+
+.btn-login {
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+  padding: 0.75rem 1rem;
+}
+</style>
+<div class="container-fluid ps-md-0" id="loginapp">
+  <div class="row g-0">
+    <div class="d-none d-md-flex col-md-4 col-lg-6 bg-image"></div>
+    <div class="col-md-8 col-lg-6">
+      <div class="login d-flex align-items-center py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-11 col-lg-9 mx-auto">
+              <h3 class="login-heading mb-4">Bem-vindo!</h3>
+              <form @submit.prevent="onSubmit">
+                <div class="form-floating mb-3">
+                  <input v-model="email" type="email" class="form-control" id="floatingInput" required placeholder="name@example.com">
+                  <label for="floatingInput">Email</label>
+                </div>
+                <div class="form-floating mb-3">
+                  <input v-model="senha" type="password" class="form-control" id="floatingPassword" required placeholder="Senha">
+                  <label for="floatingPassword">Senha</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" value="" id="rememberPasswordCheck">
+                  <label class="form-check-label" for="rememberPasswordCheck">
+                    Lembrar senha
+                  </label>
+                </div>
+                <div class="d-grid">
+                  <button class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2" type="submit">Entrar</button>
+                  <div class="text-center">
+                    <a class="small" href="#">Esqueci minha senha?</a>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+    var app = new Vue({
+        el: '#loginapp',
+        data: {
+            loadingPage: true,
+            email:"",
+            senha:""
+
+        },
+        methods: {
+            async loadPage() {
+            },
+            async onSubmit() {
+              const result = await fetch(`/admin/trylogin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: this.email,senha: this.senha, }),
+                });
+                if (result.ok) {
+                    let json = await result.json()
+                    location.href = json.redirect
+                }
+            },
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>

@@ -2,7 +2,7 @@
     <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
         <h2 class="me-md-2">Participante</h2>
         <div>
-            <a :href="'/potentes/grupo/detail/'+participante.grupoId" class="btn btn-primary" type="button"><i
+            <a :href="'/grupos/detail/'+participante.grupoId" class="btn btn-primary" type="button"><i
                     class="bi bi-arrow-left"></i></a>
         </div>
     </div>
@@ -42,13 +42,13 @@
         },
         methods: {
             async loadPage() {
-                const result = await fetch(`/potentes/participante/getOne/{{participanteId}}`)
+                const result = await fetch(`/participantes/getOne/{{participanteId}}`)
                 const data = await result.json()
                 this.participante = data;
                 this.percentualLetra = await this.getPercentages(this.participante.respostas.respostas);
             },
             async getAnalise() {
-                const result = await fetch(`/potentes/participante/getAnalise`)
+                const result = await fetch(`/participantes/getAnalise`)
                 const data = await result.json()
                 this.analise = data;
             },

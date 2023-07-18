@@ -24,7 +24,7 @@
         data: {
             loadingPage: true,
             configDesafio: {
-                quantidadeDesafios: 5,
+                quantidadeDesafios: 10,
                 respostas: ["A", "B", "C", "D"]
             },
             desafioList: [],
@@ -58,7 +58,7 @@
                     showMessageToast('warning', 'preencha uma das opções')
                     return
                 } 
-                const result = await fetch(`/potentes/desafio/addResposta/{{grupoId}}/{{email}}`, {
+                const result = await fetch(`/desafios/addResposta/{{grupoId}}/{{email}}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -66,9 +66,8 @@
                     body: JSON.stringify({ resposta: this.respostas }),
                 });
                 if (result.ok) {
-                   localStorage.removeItem('dataResposta');
-                    location.replace("/potentes/concluido")
-
+                    localStorage.removeItem('dataResposta');
+                    location.replace("/desafios/concluido")
                 }
             },
 

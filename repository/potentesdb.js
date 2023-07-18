@@ -1,6 +1,30 @@
 const dinamicas = [
-    { nome: "RPG", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] },
-    { nome: "Card", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] }
+    { id:0, nome: "RPG", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] },
+    { id:1, nome: "Card", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] }
+]
+
+const jogos =[
+    {id:0, dinamicaId:0, nome:"perdido na ilha"},
+    {id:1, dinamicaId:0, nome:"salvando a quebrada"},
+    {id:2, dinamicaId:0, nome:"problema na empresa"},
+]
+const desafios =[
+    {id:0, jogoId:0, titulo:"desafios 1", descicao:"descricao"},
+    {id:1, jogoId:0, titulo:"desafios 2", descicao:"descricao"},
+    {id:2, jogoId:0, titulo:"desafios 3", descicao:"descricao"},
+    {id:3, jogoId:0, titulo:"desafios 4", descicao:"descricao"},
+    {id:4, jogoId:0, titulo:"desafios 5", descicao:"descricao"},
+    {id:5, jogoId:0, titulo:"desafios 6", descicao:"descricao"},
+    {id:6, jogoId:0, titulo:"desafios 7", descicao:"descricao"},
+    {id:7, jogoId:0, titulo:"desafios 8", descicao:"descricao"},
+    {id:8, jogoId:0, titulo:"desafios 9", descicao:"descricao"},
+    {id:9, jogoId:0, titulo:"desafios 10", descicao:"descricao"},
+]
+const opcoes =[
+    {id:0, desafioId:0, valor:"A", texto:"opção A"},
+    {id:1, desafioId:0, valor:"B", texto:"opção A"},
+    {id:2, desafioId:0, valor:"C", texto:"opção A"},
+    {id:3, desafioId:0, valor:"D", texto:"opção A"},
 ]
 
 
@@ -217,4 +241,4 @@ const analiseDisc = [
     }
 ]
 
-module.exports = { grupos, participantes, respostas, dinamicas, analiseDisc }
+module.exports = { grupos, participantes, respostas, dinamicas, analiseDisc,jogos,desafios,opcoes }

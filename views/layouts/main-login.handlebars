@@ -30,20 +30,9 @@
 <body>
     <div class="container px-5 my-5">
         <div class="row justify-content-center">
-            <div class="text-uppercase text-light text-center fs-1">Potentes.App - cliente</div>
             <div class="col-12">
                 <div class="card border-0 rounded-3 shadow-lg">
-                    <div class="card-header">
-                        <nav class="nav">
-                            <a class="nav-link" href="/clientes">Home</a>
-                            <a class="nav-link" href="/grupos">Grupos</a>
-                            <a class="nav-link disabled">Relatorios</a>
-                        </nav>
-                    </div>
-                    <div class="card-body p-4">
-
-                        {{{body}}}
-                    </div>
+                    {{{body}}}
                 </div>
             </div>
         </div>
@@ -88,16 +77,6 @@
             return result;
         }
 
-        function validaOjeto(objeto) {
-            const propriedadesVazias = [];
-            for (let propriedade in objeto) {
-                if (!objeto[propriedade]) {
-                    const mensagem = `${propriedade} deve ser preenchida`;
-                    propriedadesVazias.push(mensagem);
-                }
-            }
-            return propriedadesVazias;
-        }
     </script>
 </body>
 

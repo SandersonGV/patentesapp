@@ -14,11 +14,21 @@ app.set('view engine', 'handlebars');
 
 // Importar rotas e controladores
 const indexRouter = require('./routes/index');
-const potentesController = require('./controllers/potentesController');
+const gruposController = require('./controllers/gruposController');
+const desafiosController = require('./controllers/desafiosController');
+const adminController = require('./controllers/adminController');
+const participantesController = require('./controllers/participantesController');
+const dinamicasController = require('./controllers/dinamicasController');
+const clientesController = require('./controllers/clientesController');
 
 // Configurar rotas
 app.use('/', indexRouter);
-app.use('/potentes', potentesController);
+app.use('/grupos', gruposController);
+app.use('/participantes', participantesController);
+app.use('/desafios', desafiosController);
+app.use('/dinamicas', dinamicasController);
+app.use('/admin', adminController);
+app.use('/clientes', clientesController);
 
 // Iniciar o servidor
 const port = 3000;
