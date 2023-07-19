@@ -1,0 +1,182 @@
+<div id="jogosapp">
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">jogo</h2>
+        <div>
+            <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
+        </div>
+    </div>
+    <div><span class="fw-semibold">Nome:</span> \{{jogo.nome}}</div>
+
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h3 class="me-md-2">Desafios</h3>
+        <div>
+            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                    class="bi bi-file-earmark-plus"></i>
+            </button>
+        </div>
+    </div>
+    <table class="table mt-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Título</th>
+                <th scope="col">Descrição</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item,index in jogo.desafios" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.titulo}}</td>
+                <td>\{{item.descricao}}</td>
+                <td>
+                    <button @click="openEditModal(item.id)" type="button" class="btn btn-info btn-sm"><i
+                            class="bi bi-eye"></i></button>
+                    <button @click="remove(item.id)" type="button" class="btn btn-danger btn-sm"><i
+                            class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel">Novo</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="desafio.titulo">
+                        <label for="floatingInput">Título</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea type="text" class="form-control" v-model="desafio.descricao" rows="3"></textarea>
+                        <label for="floatingInput">Descrição</label>
+                    </div>
+                    <span class="ffs-6">Opções</span>
+                    <div class="form-floating mb-3" v-for="opcao,index in desafio.opcoes" :key="index">
+                        <input type="text" class="form-control" v-model="opcao.descricao">
+                        <label for="floatingInput">Opção \{{opcao.valor}} </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i>
+                        Cancelar</button>
+                    <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#jogosapp',
+        data: {
+            loadingPage: true,
+            jogo: [],
+            desafio: {
+                opcoes: [
+                    { valor: "A", descricao: "" },
+                    { valor: "B", descricao: "" },
+                    { valor: "C", descricao: "" },
+                    { valor: "D", descricao: "" }
+                ]
+            },
+            addModal: {}
+
+        },
+        methods: {
+            async loadPage() {
+                const result = await fetch(`/admin/jogos/getOne/{{data.id}}`)
+                const data = await result.json()
+                this.jogo = data;
+            },
+            async openAddModal() {
+                this.desafio = {
+                    opcoes: [
+                        { valor: "A", descricao: "" },
+                        { valor: "B", descricao: "" },
+                        { valor: "C", descricao: "" },
+                        { valor: "D", descricao: "" }
+                    ]
+                }
+                this.addModal = new bootstrap.Modal('#adModal')
+                this.addModal.show()
+            },
+            async openEditModal(id) {
+                this.desafio = await this.getDesafio(id)
+                if (this.desafio.opcoes.length == 0) {
+                    this.desafio.opcoes = [
+                        { valor: "A", descricao: "" },
+                        { valor: "B", descricao: "" },
+                        { valor: "C", descricao: "" },
+                        { valor: "D", descricao: "" }
+                    ]
+                }
+                this.addModal = new bootstrap.Modal('#adModal')
+                this.addModal.show()
+            },
+            async save() {
+                let validaResult = validaOjeto(this.desafio);
+
+                if (validaResult.length > 0) {
+                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                    return
+                }
+                let payload = { ... this.desafio }
+                const result = await fetch(`/admin/desafios/add/{{data.id}}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: payload }),
+                });
+                if (result.ok) {
+                    const data = await result.json()
+                    await this.loadPage();
+                    this.desafio = {
+                        opcoes: [
+                            { valor: "A", descricao: "" },
+                            { valor: "B", descricao: "" },
+                            { valor: "C", descricao: "" },
+                            { valor: "D", descricao: "" }
+                        ]
+                    }
+                    this.addModal.hide()
+                    showMessageToast('success', 'item adicionado!')
+
+                }
+            },
+            async remove(id) {
+                let questionResult = await ShowQuestion("Deseja realmente remover este item?");
+                if (!questionResult)
+                    return
+
+                const result = await fetch(`/admin/desafios/remove/${this.jogo.id}/${id}`);
+                if (result.ok) {
+                    this.loadPage();
+                    showMessageToast('success', 'item removido!')
+                }
+            },
+            async getDesafio(id) {
+                const result = await fetch(`/admin/desafios/getOne/${id}`)
+                const data = await result.json()
+                return data;
+            }
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>

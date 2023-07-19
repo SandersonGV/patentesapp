@@ -6,7 +6,7 @@ class JogosService {
         return jogo ?? false;
     }
     
-    getOneById = async (id) => {
+    getOne = async (id) => {
         let jogo = jogos.find(o => o.id == id)
         return jogo ?? false;
     }

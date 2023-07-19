@@ -1,61 +1,51 @@
 const express = require('express');
-const GrupoService = require('../services/GrupoService');
-const ParticipanteService = require('../services/ParticipanteService');
-const DinamicaService = require('../services/DinamicaService');
-const RespostaService = require('../services/RespostaService');
-const AnaliseService = require('../services/AnaliseService');
+const OpcaoService = require('../services/OpcaoService');
+const DesafioService = require('../services/DesafioService');
 const router = express.Router();
 
+router.get('/detail/:id', (req, res) => {
+  let { id } = req.params
+  res.render('potentes/admin/desafio/index', { layout: 'main-admin', data: { id: id } });
+});
 
-router.get('/solo/:grupoId/:email', async (req, res) => {
-  let { grupoId, email } = req.params
-  let participante = await ParticipanteService.getOne(grupoId, email);
+router.get('/getAll', async (req, res) => {
+  let data = await DesafioService.getAll();
+  res.json(data)
+});
 
-  if (participante) {
-    res.render('potentes/desafio/index', { grupoId, email });
-    return;
+router.get('/getOne/:id', async (req, res) => {
+  let { id } = req.params
+  let data = await DesafioService.getOne(id);
+  data.opcoes = await OpcaoService.getAll(id)
+  res.json(data)
+});
+
+router.post('/add/:jogoId', async (req, res) => {
+  let { jogoId } = req.params
+  let { data } = req.body
+  let dataResult = await DesafioService.add(jogoId,data);
+  for (const opcao of data.opcoes) {
+      await OpcaoService.add(data.id,opcao)
   }
-  res.render('potentes/desafio/naoencontrado');
+  data.opcoes
+  res.json(dataResult)
 });
 
-router.get('/emgrupo/:grupoId', async (req, res) => {
-  let { grupoId} = req.params
-  let grupo = await GrupoService.getOne(grupoId);
-
-  if (grupo) {
-    res.render('potentes/desafio/emgrupo', { grupoId });
-    return;
+router.post('/edit/:jogoId', async (req, res) => {
+  let { jogoId } = req.params
+  let { data } = req.body
+  let dataResult = await DesafioService.add(jogoId,data);
+  for (const opcao of data.opcoes) {
+      await OpcaoService.add(data.id,opcao)
   }
-  res.render('potentes/desafio/naoencontrado');
+  data.opcoes
+  res.json(dataResult)
 });
 
-
-router.post('/addResposta/:grupoId/:email', async (req, res) => {
-  let { grupoId, email } = req.params
-  let { resposta } = req.body;
-  try {
-    let participante = await ParticipanteService.getOne(grupoId, email);
-    await RespostaService.addResposta(participante.id, resposta);
-    res.json({ sucess: true });
-  } catch (error) {
-    res.status(400).json("erro ao salvar");
-  }
+router.get('/remove/:jogoId/:id', async (req, res) => {
+  let { jogoId,id } = req.params
+  let dataResult = await DesafioService.remove(jogoId,id);
+  res.json(dataResult)
 });
-
-router.post('/addRespostaGrupo/:grupoId', async (req, res) => {
-  let { participantes } = req.body;
-  try {
-    await RespostaService.addRespostaGrupo(participantes);
-    res.json({ sucess: true });
-  } catch (error) {
-    res.status(400).json("erro ao salvar");
-  }
-});
-
-router.get('/concluido', async (req, res) => {
-  res.render('potentes/desafio/concluido');
-});
-
-
 
 module.exports = router;

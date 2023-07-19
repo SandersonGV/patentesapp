@@ -12,14 +12,14 @@ class DinamicaService {
 
     Add = async (item) => {
         item.id= dinamicas.length + 1
-        item.push(item)
+        dinamicas.push(item)
         return dinamicas;
     }
 
     remove = async (id) => {
         let idx = dinamicas.findIndex(o => o.id == id);
         dinamicas.splice(idx, 1);
-        return dinamicas;
+        return idx;
     }
 }
 

@@ -9,22 +9,22 @@ const jogos =[
     {id:2, dinamicaId:0, nome:"problema na empresa"},
 ]
 const desafios =[
-    {id:0, jogoId:0, titulo:"desafios 1", descicao:"descricao"},
-    {id:1, jogoId:0, titulo:"desafios 2", descicao:"descricao"},
-    {id:2, jogoId:0, titulo:"desafios 3", descicao:"descricao"},
-    {id:3, jogoId:0, titulo:"desafios 4", descicao:"descricao"},
-    {id:4, jogoId:0, titulo:"desafios 5", descicao:"descricao"},
-    {id:5, jogoId:0, titulo:"desafios 6", descicao:"descricao"},
-    {id:6, jogoId:0, titulo:"desafios 7", descicao:"descricao"},
-    {id:7, jogoId:0, titulo:"desafios 8", descicao:"descricao"},
-    {id:8, jogoId:0, titulo:"desafios 9", descicao:"descricao"},
-    {id:9, jogoId:0, titulo:"desafios 10", descicao:"descricao"},
+    {id:0, jogoId:0, titulo:"desafios 1", descricao:"descricao"},
+    {id:1, jogoId:0, titulo:"desafios 2", descricao:"descricao"},
+    {id:2, jogoId:0, titulo:"desafios 3", descricao:"descricao"},
+    {id:3, jogoId:0, titulo:"desafios 4", descricao:"descricao"},
+    {id:4, jogoId:0, titulo:"desafios 5", descricao:"descricao"},
+    {id:5, jogoId:0, titulo:"desafios 6", descricao:"descricao"},
+    {id:6, jogoId:0, titulo:"desafios 7", descricao:"descricao"},
+    {id:7, jogoId:0, titulo:"desafios 8", descricao:"descricao"},
+    {id:8, jogoId:0, titulo:"desafios 9", descricao:"descricao"},
+    {id:9, jogoId:0, titulo:"desafios 10", descricao:"descricao"},
 ]
 const opcoes =[
-    {id:0, desafioId:0, valor:"A", texto:"opção A"},
-    {id:1, desafioId:0, valor:"B", texto:"opção A"},
-    {id:2, desafioId:0, valor:"C", texto:"opção A"},
-    {id:3, desafioId:0, valor:"D", texto:"opção A"},
+    {id:0, desafioId:0, valor:"A", descricao:"opção A"},
+    {id:1, desafioId:0, valor:"B", descricao:"opção A"},
+    {id:2, desafioId:0, valor:"C", descricao:"opção A"},
+    {id:3, desafioId:0, valor:"D", descricao:"opção A"},
 ]
 
 

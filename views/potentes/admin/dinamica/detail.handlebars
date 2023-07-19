@@ -1,21 +1,17 @@
-<div id="gruposapp">
+<div id="dinamicasapp">
     <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">Grupo</h2>
+        <h2 class="me-md-2">Dinamica</h2>
         <div>
             <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
         </div>
     </div>
-    <div><span class="fw-semibold">Data:</span> \{{new Date(grupo.data).toLocaleDateString()}}</div>
-    <div><span class="fw-semibold">Dinamica:</span> \{{grupo.dinamica}}</div>
-    <div><span class="fw-semibold">Jogo:</span> \{{grupo.jogo}}</div>
-    <div><span class="fw-semibold">Cliente:</span> \{{grupo.cliente}}</div>
-    <div><span class="fw-semibold">Monitor:</span> \{{grupo.monitor}}</div>
+    <div><span class="fw-semibold">Nome:</span> \{{dinamica.nome}}</div>
 
     <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">Participantes</h2>
+        <h2 class="me-md-2">jogos</h2>
         <div>
-            <button @click="openParicipanteModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i>
-                Participante</button>
+            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-plus"></i>
+                </button>
         </div>
     </div>
     <table class="table mt-2">
@@ -23,57 +19,42 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">Nome</th>
-                <th scope="col">Email</th>
-                <th scope="col">Respostas</th>
                 <th scope="col">Ações</th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="item,index in grupo.participantes" :key="index">
+            <tr v-for="item,index in dinamica.jogos" :key="index">
                 <th scope="row">\{{index+1}}</th>
                 <td>\{{item.nome}}</td>
-                <td>\{{item.email}}</td>
-                <td>\{{item?.respostas?item.respostas.length:0}}</td>
                 <td>
-                    <a :href="'/participantes/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
+                    <a :href="'/admin/jogos/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
                             class="bi bi-eye"></i></a>
-                    <button @click="removeParticipante(item.id)" type="button" class="btn btn-danger btn-sm"><i
+                    <button @click="remove(item.id)" type="button" class="btn btn-danger btn-sm"><i
                             class="bi bi-trash"></i></button>
-                    <button @click="copiarLinkResposta(item.email)" type="button" class="btn btn-success btn-sm"><i
-                            class="bi bi-link-45deg"></i></button>
                 </td>
             </tr>
         </tbody>
     </table>
-    <div class="d-grid gap-2">
-        <a href="/desafios/emgrupo/{{grupoId}}" type="button" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-box-arrow-up-right"></i> Iniciar desafio gerenciado</a>
-    </div>
+
     <!-- Modal -->
-    <div class="modal fade" id="addParticipante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel">incluir participante</h1>
+                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel">Novo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" v-model="participante.nome"
-                            placeholder="name@example.com">
+                        <input type="text" class="form-control" v-model="jogo.nome">
                         <label for="floatingInput">Nome</label>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <input type="email" class="form-control" v-model="participante.email"
-                            placeholder="name@example.com">
-                        <label for="floatingInput">Email</label>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i>
                         Cancelar</button>
-                    <button type="button" @click="saveParticipante" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                    <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
                         Salvar</button>
                 </div>
             </div>
@@ -85,63 +66,58 @@
 <script>
 
     var app = new Vue({
-        el: '#gruposapp',
+        el: '#dinamicasapp',
         data: {
             loadingPage: true,
-            grupo: [],
-            participante: {nome:"",email:""},
-            addParticipanteModal: {}
+            dinamica: [],
+            jogo: {nome:""},
+            addModal: {}
 
         },
         methods: {
             async loadPage() {
-                const result = await fetch(`/grupos/getOne/{{grupoId}}`)
+                const result = await fetch(`/admin/dinamicas/getOne/{{data.id}}`)
                 const data = await result.json()
-                this.grupo = data;
+                this.dinamica = data;
             },
-            async openParicipanteModal() {
-                this.participante = {nome:"",email:""}
-                this.addParticipanteModal = new bootstrap.Modal('#addParticipante')
-                this.addParticipanteModal.show()
+            async openAddModal() {
+                this.jogo = {nome:""}
+                this.addModal = new bootstrap.Modal('#adModal')
+                this.addModal.show()
             },
-            async saveParticipante() {
-                let validaResult = validaOjeto(this.participante);
+            async save() {
+                let validaResult = validaOjeto(this.jogo);
 
                 if(validaResult.length>0){
                     ShowMessage("warning","Campos obrigatórios",validaResult.join("<br>"))
                     return
                 }
 
-                const result = await fetch(`/participantes/add/{{grupoId}}`, {
+                const result = await fetch(`/admin/jogos/add/{{data.id}}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ data: this.participante }),
+                    body: JSON.stringify({ data: this.jogo }),
                 });
                 if (result.ok) {
                     const data = await result.json()
                     await this.loadPage();
-                    this.participante = {}
-                    this.addParticipanteModal.hide()
-                    showMessageToast('success','participante adicionado!')
+                    this.jogo = {}
+                    this.addModal.hide()
+                    showMessageToast('success','item adicionado!')
 
                 }
             },
-            async copiarLinkResposta(email){
-                await navigator.clipboard.writeText(`${location.host}/desafios/solo/${this.grupo.id}/${email}`)
-                showMessageToast('success','Link copiado!')
-
-            },
-            async removeParticipante(id) {
-                let questionResult = await ShowQuestion("Deseja realmente remover este grupo?");
+            async remove(id) {
+                let questionResult = await ShowQuestion("Deseja realmente remover este item?");
                 if (!questionResult)
                     return
 
-                const result = await fetch(`/participantes/remove/${this.grupo.id}/${id}`);
+                const result = await fetch(`/admin/jogos/remove/${this.dinamica.id}/${id}`);
                 if (result.ok) {
                     this.loadPage();
-                    showMessageToast('success', 'participante removido!')
+                    showMessageToast('success', 'item removido!')
                 }
             },
 
