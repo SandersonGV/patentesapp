@@ -1,13 +1,17 @@
-const {grupos } = require("../repository/potentesdb")
 
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 class GrupoService {
     getAll = async () => {
-        return [...grupos];
+        const grupos = await apiService.get("/grupos")
+        return [...grupos.content];
     }
     
     getOne = async (id) => {
-       let grupo =  grupos.find(o => o.id == id);
-        return  {...grupo}
+        const grupo = await apiService.get(`/grupos/${id}`)
+        return  {...grupo.content}
     }
 
     AddGrupo = async (grupo) => {
