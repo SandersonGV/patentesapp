@@ -22,11 +22,11 @@ router.post('/addGrupo', async (req, res, next) => {
   }
 });
 
-router.post('/edit/:jogoId', async (req, res, next) => {
+router.post('/edit/:grupoId', async (req, res, next) => {
   try {
-    let { data } = req.body
-    let id = data.id
-    let dataResult = await GrupoService.edit(id, data);
+    let { grupoId } = req.params
+    let  data  = req.body
+    let dataResult = await GrupoService.edit(grupoId, data);
     res.json(dataResult)
     
   } catch (error) {

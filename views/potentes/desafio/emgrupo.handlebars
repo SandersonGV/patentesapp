@@ -9,7 +9,8 @@
                 <ul class="dropdown-menu">
                     <li><button @click="reset" class="dropdown-item" type="button"><i class="bi bi-arrow-clockwise"></i>
                             Resetar</button></li>
-                    <li><a href="/grupos/detail/{{grupoId}}" class="dropdown-item" type="button"><i class="bi bi-box-arrow-left"></i> Sair</a>
+                    <li><a href="/grupos/detail/{{grupoId}}" class="dropdown-item" type="button"><i
+                                class="bi bi-box-arrow-left"></i> Sair</a>
                     </li>
                 </ul>
             </div>
@@ -76,7 +77,7 @@
                 const result = await fetch(`/grupos/getOne/{{grupoId}}`)
                 const data = await result.json()
                 this.jogo = data.jogo;
-                this.desafioList = data.jogo.desafios
+                this.desafioList = data.jogo.desafios.sort((a, b) => a.id - b.id)
                 this.participantes = data.participantes;
 
                 for (const item of this.participantes) {

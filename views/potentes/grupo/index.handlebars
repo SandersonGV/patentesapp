@@ -31,7 +31,7 @@
                         <td>\{{item.jogo.nome}}</td>
                         <td>\{{item.cliente}}</td>
                         <td>\{{item.monitor}}</td>
-                        <td>\{{item?.participantes ? item.participantes.length:0}} <span
+                        <td>\{{item?.participantes ? item.participantes.length : 0}} <span
                                 :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">\{{status.find(o=>o.id
                                 ==item.status).descricao}}</span> </td>
                         <td>
