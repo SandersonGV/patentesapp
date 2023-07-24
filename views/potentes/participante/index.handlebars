@@ -20,7 +20,7 @@
             <div v-if="participante?.resposta && participante.resposta.length == 0">
                 <span>Nenhuma resposta em contrada</span>
             </div>
-            <ul class="list-group list-group-numbered" v-else>
+            <ul class="list-group " v-else>
                 <li v-for="item,index in analise" :key="index"
                     class="list-group-item d-flex justify-content-between align-items-start">
                     <div class="ms-2 me-auto">
@@ -32,7 +32,7 @@
                             </li>
                         </ul>
                     </div>
-                    <span class="badge bg-primary rounded-pill">\{{(percentualLetra[item.id]||0)+"%"}}</span>
+                    <span class="badge bg-primary rounded-pill">\{{(Math.floor(percentualLetra[item.id])||0)+"%"}}</span>
                 </li>
             </ul>
         </div>
@@ -56,7 +56,7 @@
                 const data = await result.json()
                 this.participante = data;
                 if (this.participante.resposta.length > 0) {
-                    this.percentualLetra = await this.getPercentages(this.participante.respostas.respostas);
+                    this.percentualLetra = await this.getPercentages(this.participante.resposta.map(o=>o.valor));
                     await this.getAnalise();
                 }
             },

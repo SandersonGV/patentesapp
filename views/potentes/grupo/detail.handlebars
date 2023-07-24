@@ -67,7 +67,7 @@
 
     <div class="d-grid gap-2 m-4">
         <a href="/desafios/emgrupo/{{grupoId}}" type="button"
-            :class="'btn btn-outline-primary btn-sm '+((grupo?.participantes && grupo.participantes.length==0)?'disabled' :'') ">
+            :class="'btn btn-outline-primary btn-sm '+((grupo?.participantes && grupo.participantes.length==0) || grupo.status!=1?'disabled' :'') ">
             <i class="bi bi-box-arrow-up-right"></i> Iniciar desafio gerenciado</a>
     </div>
     <!-- Modal -->
