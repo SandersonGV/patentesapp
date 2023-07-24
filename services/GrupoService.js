@@ -5,25 +5,28 @@ const {POTENTES_API_URL} = process.env
 const apiService = new ApiService(POTENTES_API_URL)
 class GrupoService {
     getAll = async () => {
-        const grupos = await apiService.get("/grupos")
-        return [...grupos.content];
+        const items = await apiService.get("/grupos")
+        return [...items.content];
     }
     
     getOne = async (id) => {
-        const grupo = await apiService.get(`/grupos/${id}`)
-        return  {...grupo.content}
+        const item = await apiService.get(`/grupos/${id}`)
+        return  item.content
     }
 
-    AddGrupo = async (grupo) => {
-        grupo.id= grupos.length + 1
-        grupos.push(grupo)
-        return grupos;
+    add = async (data) => {
+        const newItem = await apiService.post(`/grupos`,data)
+        return newItem.content;
     }
 
-    removeGrupo = async (id) => {
-        let idx = grupos.findIndex(o => o.id == id);
-        grupos.splice(idx, 1);
-        return grupos;
+    edit = async (id, data) => {
+        const newItem = await apiService.put(`/grupos/${id}`,data)
+        return newItem.content.id;
+    }
+
+    remove = async (id) => {
+        const newItem = await apiService.put(`/grupos/${id}`,{ativo:false})
+        return newItem.content.id;
     }
 }
 

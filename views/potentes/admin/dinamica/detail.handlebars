@@ -1,41 +1,57 @@
 <div id="dinamicasapp">
-    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">Dinamica</h2>
-        <div>
-            <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
+    <div class="card mx-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+                <h2 class="me-md-2">Dinamica</h2>
+                <div>
+                    <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
+                </div>
+            </div>
+            <div><span class="fw-semibold">Nome:</span> \{{dinamica.nome}}</div>
         </div>
     </div>
-    <div><span class="fw-semibold">Nome:</span> \{{dinamica.nome}}</div>
-
-    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">jogos</h2>
-        <div>
-            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-plus"></i>
-                </button>
+    <div class="card m-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+                <h2 class="me-md-2">jogos</h2>
+                <div>
+                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                            class="bi bi-file-earmark-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <table class="table mt-2">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nome</th>
+                        <th style="width: 1%" scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item,index in dinamica.jogos" :key="index">
+                        <th scope="row">\{{index+1}}</th>
+                        <td>\{{item.nome}}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a :href="'/admin/jogos/detail/'+item.id" class="dropdown-item" type="button"><i
+                                                class="bi bi-eye"></i>
+                                            Visualisar</a></li>
+                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
+                                            type="button"><i class="bi bi-trash"></i> Remover</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-    <table class="table mt-2">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="item,index in dinamica.jogos" :key="index">
-                <th scope="row">\{{index+1}}</th>
-                <td>\{{item.nome}}</td>
-                <td>
-                    <a :href="'/admin/jogos/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
-                            class="bi bi-eye"></i></a>
-                    <button @click="remove(item.id)" type="button" class="btn btn-danger btn-sm"><i
-                            class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
     <!-- Modal -->
     <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -52,7 +68,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i>
                         Cancelar</button>
                     <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
                         Salvar</button>
@@ -70,7 +87,7 @@
         data: {
             loadingPage: true,
             dinamica: [],
-            jogo: {nome:""},
+            jogo: { nome: "" },
             addModal: {}
 
         },
@@ -81,15 +98,15 @@
                 this.dinamica = data;
             },
             async openAddModal() {
-                this.jogo = {nome:""}
+                this.jogo = { nome: "" }
                 this.addModal = new bootstrap.Modal('#adModal')
                 this.addModal.show()
             },
             async save() {
                 let validaResult = validaOjeto(this.jogo);
 
-                if(validaResult.length>0){
-                    ShowMessage("warning","Campos obrigatórios",validaResult.join("<br>"))
+                if (validaResult.length > 0) {
+                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
                     return
                 }
 
@@ -100,14 +117,16 @@
                     },
                     body: JSON.stringify({ data: this.jogo }),
                 });
-                if (result.ok) {
-                    const data = await result.json()
-                    await this.loadPage();
-                    this.jogo = {}
-                    this.addModal.hide()
-                    showMessageToast('success','item adicionado!')
-
+                if (!result.ok) {
+                    showMessageToast('danger', 'não foi possivel executar a operação')
+                    return
                 }
+                const data = await result.json()
+                await this.loadPage();
+                this.jogo = {}
+                this.addModal.hide()
+                showMessageToast('success', 'item adicionado!')
+
             },
             async remove(id) {
                 let questionResult = await ShowQuestion("Deseja realmente remover este item?");
@@ -115,10 +134,12 @@
                     return
 
                 const result = await fetch(`/admin/jogos/remove/${this.dinamica.id}/${id}`);
-                if (result.ok) {
-                    this.loadPage();
-                    showMessageToast('success', 'item removido!')
+                if (!result.ok) {
+                    showMessageToast('danger', 'não foi possivel executar a operação')
+                    return
                 }
+                this.loadPage();
+                showMessageToast('success', 'item removido!')
             },
 
         },

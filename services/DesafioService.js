@@ -1,31 +1,31 @@
-const {desafios} = require("../repository/potentesdb")
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 
 class DesafioService {
     getAll = async (jogoId) => {
-        let desafio = desafios.filter(o => o.jogoId == jogoId)
-        return desafio ?? false;
+        const desafios = await apiService.get("/desafios",{jogoId:jogoId})
+        return desafios?.content ?? false;
     }
     
     getOne = async (id) => {
-        let desafio = desafios.find(o => o.id == id)
-        return desafio ?? false;
+        const desafio = await apiService.get(`/desafios/${id}`)
+        return desafio?.content ?? false;
     }
 
-    add = async (jogoId, data) => {
-        data.id = desafios.length + 1
-        data.jogoId = jogoId
-        desafios.push(data)
-        return {...data};
+    add = async (data) => {
+        const newItem = await apiService.post(`/desafios`,data)
+        return newItem.content;
     }
 
-    remove= async (jogoId, id) => {
-        let result = false;
-        let desafioidx = desafios.findIndex(o => o.id == id && o.jogoId == jogoId )
-        if (desafioidx > 0) {
-            desafios.splice(desafioidx, 1);
-            result = true;
-        }
-        return result;
+    edit = async (id, data) => {
+        const newItem = await apiService.put(`/desafios/${id}`,data)
+        return newItem.content.id;
+    }
+    remove= async (id) => {
+        const newItem = await apiService.put(`/desafios/${id}`,{ativo:false})
+        return newItem.content.id;
     }
 }
 

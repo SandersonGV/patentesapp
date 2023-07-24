@@ -1,44 +1,59 @@
 <div id="gruposapp">
-    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">Lista de Grupos</h2>
-        <div>
-            <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i>
-                Grupo</button>
+    <div class="card mx-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+                <h2 class="me-md-2">Lista de Grupos</h2>
+                <div>
+                    <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i
+                            class="bi bi-plus"></i>
+                        Grupo</button>
+                </div>
+            </div>
+
+            <table class="table mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Dinamica</th>
+                        <th scope="col">Jogo</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Monitor</th>
+                        <th scope="col">Qtd participantes</th>
+                        <th style="width: 1%" scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item,index in grupos" :key="index">
+                        <th scope="row">\{{item.id}}</th>
+                        <td>\{{item.data?item.data.split("T")[0].split("-").reverse().join("/"):""}}</td>
+                        <td>\{{item.jogo.dinamica.nome}}</td>
+                        <td>\{{item.jogo.nome}}</td>
+                        <td>\{{item.cliente}}</td>
+                        <td>\{{item.monitor}}</td>
+                        <td>\{{item?.participantes ? item.participantes.length:0}} <span
+                                :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">\{{status.find(o=>o.id
+                                ==item.status).descricao}}</span> </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a :href="'/grupos/detail/'+item.id" class="dropdown-item" type="button"><i
+                                                class="bi bi-eye"></i>
+                                            Visualisar</a></li>
+                                    <li><button @click="removeGrupo(item.id)" class="dropdown-item text-danger"
+                                            type="button"><i class="bi bi-trash"></i> Remover</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-
-
-    <table class="table mt-4">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Data</th>
-                <th scope="col">Dinamica</th>
-                <th scope="col">Jogo</th>
-                <th scope="col">Cliente</th>
-                <th scope="col">Monitor</th>
-                <th scope="col">Qtd participantes</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="item,index in grupos" :key="index">
-                <th scope="row">\{{item.id}}</th>
-                <td>\{{item.data}}</td>
-                <td>\{{item.dinamica}}</td>
-                <td>\{{item.jogo}}</td>
-                <td>\{{item.cliente}}</td>
-                <td>\{{item.monitor}}</td>
-                <td>\{{item?.participantes ? item.participantes.length:0}}</td>
-                <td>
-                    <a :href="'/grupos/detail/'+item.id" type="button" class="btn btn-info btn-sm"><i
-                            class="bi bi-eye"></i></a>
-                    <button @click="removeGrupo(item.id)" type="button" class="btn btn-danger btn-sm"><i
-                            class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
 
     <!-- Modal -->
     <div class="modal fade" id="addGrupo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -56,19 +71,19 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <select class="form-select" v-model="novoGrupo.dinamica">
+                        <select class="form-select" v-model="novoGrupo.dinamicaId">
                             <option selected>Selecione um dinamica</option>
-                            <option v-for="item,index in dinamicas" :key="index" :value="item.nome">\{{item.nome}}
+                            <option v-for="item,index in dinamicas" :key="index" :value="item.id">\{{item.nome}}
                             </option>
                         </select>
                         <label class="text-capitalize">dinamica</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <select class="form-select" v-model="novoGrupo.jogo">
+                        <select class="form-select" v-model="novoGrupo.jogoId">
                             <option selected>Selecione um jogo</option>
-                            <option v-for="item,index in dinamicas.find(o => o.nome == novoGrupo.dinamica)?.jogos||[]"
-                                :key="index" :value="item">\{{item}}</option>
+                            <option v-for="item,index in dinamicas.find(o => o.id == novoGrupo.dinamicaId)?.jogos||[]"
+                                :key="index" :value="item.id">\{{item.nome}}</option>
                         </select>
                         <label class="text-capitalize">jogo</label>
                     </div>
@@ -107,6 +122,11 @@
             dinamicas: [],
             novoGrupo: { data: "", dinamica: "", jogo: "", cliente: "", monitor: "" },
             addGrupoModal: {},
+            status: [
+                { id: 1, descricao: "Aberto", tag: "primary" },
+                { id: 2, descricao: "Em Analise", tag: "warning" },
+                { id: 3, descricao: "Concluído", tag: "success" },
+            ]
         },
         methods: {
             async loadPage() {
@@ -133,11 +153,14 @@
                     return
 
                 const result = await fetch(`/grupos/remove/${grupoId}`);
-                if (result.ok) {
-                    this.loadPage();
-                    showMessageToast('success', 'Grupo removido!')
-
+                if (!result.ok) {
+                    showMessageToast('danger', 'Erro ao executar esta ação!')
+                    return
                 }
+                this.getGrupos();
+                showMessageToast('success', 'Grupo removido!')
+
+
             },
             async saveGrupo() {
                 let validaResult = validaOjeto(this.novoGrupo);
@@ -153,14 +176,16 @@
                     },
                     body: JSON.stringify({ data: this.novoGrupo }),
                 });
-                if (result.ok) {
-                    const data = await result.json()
-                    this.grupos = data;
-                    this.novoGrupo = {}
-                    this.addGrupoModal.hide()
-                    showMessageToast('success', 'Grupo adicionado!')
-
+                if (!result.ok) {
+                    showMessageToast('danger', 'Erro ao executar esta ação!')
+                    return
                 }
+                const data = await result.json()
+                await this.getGrupos()
+                this.novoGrupo = {}
+                this.addGrupoModal.hide()
+                showMessageToast('success', 'Grupo adicionado!')
+
             },
 
         },

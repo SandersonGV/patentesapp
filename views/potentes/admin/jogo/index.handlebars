@@ -1,43 +1,60 @@
 <div id="jogosapp">
-    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-        <h2 class="me-md-2">jogo</h2>
-        <div>
-            <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
+    <div class="card mx-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+                <h2 class="me-md-2">jogo</h2>
+                <div>
+                    <a :href="'/admin/dinamicas/detail/'+jogo.dinamicaId" class="btn btn-primary" type="button"><i
+                            class="bi bi-arrow-left"></i></a>
+                </div>
+            </div>
+            <div><span class="fw-semibold">Nome:</span> \{{jogo.nome}}</div>
         </div>
     </div>
-    <div><span class="fw-semibold">Nome:</span> \{{jogo.nome}}</div>
-
-    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-        <h3 class="me-md-2">Desafios</h3>
-        <div>
-            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
-                    class="bi bi-file-earmark-plus"></i>
-            </button>
+    <div class="card m-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+                <h3 class="me-md-2">Desafios</h3>
+                <div>
+                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                            class="bi bi-file-earmark-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <table class="table mt-2">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Título</th>
+                        <th scope="col">Descrição</th>
+                        <th style="width: 1%" scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item,index in jogo.desafios" :key="index">
+                        <th scope="row">\{{index+1}}</th>
+                        <td>\{{item.titulo}}</td>
+                        <td>\{{item.descricao}}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
+                                                class="bi bi-eye"></i>
+                                            Visualisar</button></li>
+                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
+                                            type="button"><i class="bi bi-trash"></i> Remover</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-    <table class="table mt-2">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Título</th>
-                <th scope="col">Descrição</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="item,index in jogo.desafios" :key="index">
-                <th scope="row">\{{index+1}}</th>
-                <td>\{{item.titulo}}</td>
-                <td>\{{item.descricao}}</td>
-                <td>
-                    <button @click="openEditModal(item.id)" type="button" class="btn btn-info btn-sm"><i
-                            class="bi bi-eye"></i></button>
-                    <button @click="remove(item.id)" type="button" class="btn btn-danger btn-sm"><i
-                            class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
 
     <!-- Modal -->
     <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -91,7 +108,8 @@
                     { valor: "D", descricao: "" }
                 ]
             },
-            addModal: {}
+            addModal: {},
+            action: "",
 
         },
         methods: {
@@ -101,6 +119,7 @@
                 this.jogo = data;
             },
             async openAddModal() {
+                this.action = "add";
                 this.desafio = {
                     opcoes: [
                         { valor: "A", descricao: "" },
@@ -113,6 +132,7 @@
                 this.addModal.show()
             },
             async openEditModal(id) {
+                this.action = "edit";
                 this.desafio = await this.getDesafio(id)
                 if (this.desafio.opcoes.length == 0) {
                     this.desafio.opcoes = [
@@ -133,7 +153,7 @@
                     return
                 }
                 let payload = { ... this.desafio }
-                const result = await fetch(`/admin/desafios/add/{{data.id}}`, {
+                const result = await fetch(`/admin/desafios/${this.action}/{{data.id}}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,7 +162,7 @@
                 });
                 if (result.ok) {
                     const data = await result.json()
-                    await this.loadPage();
+                    this.loadPage();
                     this.desafio = {
                         opcoes: [
                             { valor: "A", descricao: "" },

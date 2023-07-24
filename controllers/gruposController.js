@@ -1,9 +1,6 @@
 const express = require('express');
 const GrupoService = require('../services/GrupoService');
-const ParticipanteService = require('../services/ParticipanteService');
-const RespostaService = require('../services/RespostaService');
 const router = express.Router();
-
 
 router.get('/', async (req, res) => {
   res.render('potentes/grupo/index', {});
@@ -14,35 +11,59 @@ router.get('/detail/:grupoId', async (req, res) => {
   res.render('potentes/grupo/detail', { grupoId });
 });
 
-router.post('/addGrupo', async (req, res) => {
-let { data } = req.body
-  let grupos = await GrupoService.AddGrupo(data);
-  res.json(grupos)
-});
-
-router.get('/remove/:grupoId', async (req, res) => {
-  let { grupoId } = req.params
-  let resultdata = await GrupoService.removeGrupo(grupoId);
-  res.json(resultdata)
-});
-
-router.get('/getOne/:grupoId', async (req, res) => {
-  let { grupoId } = req.params
-  let data = await GrupoService.getOne(grupoId);
-  data.participantes = await ParticipanteService.getAll(grupoId)
-  for (const participante of data.participantes) {
-    let respostas = await RespostaService.getOne(participante.id)
-    participante.respostas = respostas.respostas
+router.post('/addGrupo', async (req, res, next) => {
+  try {
+    let { data } = req.body
+    let grupo = await GrupoService.add(data);
+    res.json(grupo)
+    
+  } catch (error) {
+    next(error)
   }
-  res.json(data)
 });
 
-router.get('/getAll', async (req, res) => {
-  let data = await GrupoService.getAll();
-  for (const grupo of data) {
-    grupo.participantes = await ParticipanteService.getAll(grupo.id)
+router.post('/edit/:jogoId', async (req, res, next) => {
+  try {
+    let { data } = req.body
+    let id = data.id
+    let dataResult = await GrupoService.edit(id, data);
+    res.json(dataResult)
+    
+  } catch (error) {
+    next(error)
   }
-  res.json(data)
+});
+
+router.get('/remove/:grupoId', async (req, res, next) => {
+  try {
+    let { grupoId } = req.params
+    let resultdata = await GrupoService.remove(grupoId);
+    res.json(resultdata)
+    
+  } catch (error) {
+    next(error)
+  }
+});
+
+router.get('/getOne/:grupoId', async (req, res, next) => {
+  try {
+    let { grupoId } = req.params
+    let data = await GrupoService.getOne(grupoId);
+    res.json(data)
+    
+  } catch (error) {
+    next(error)
+  }
+});
+
+router.get('/getAll', async (req, res, next) => {
+  try {
+    let data = await GrupoService.getAll();
+    res.json(data)
+    
+  } catch (error) {
+    next(error)
+  }
 });
 
 module.exports = router;

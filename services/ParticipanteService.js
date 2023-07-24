@@ -1,36 +1,33 @@
-const {participantes} = require("../repository/potentesdb")
 
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 class ParticipanteService {
     getAll = async (grupoId) => {
-        let participante = participantes.filter(o => o.grupoId == grupoId)
-        return participante ?? false;
+        const participante = await apiService.get("/participantes",{grupoId:grupoId})
+        return participante?.content ?? false;
     }
     
     getOne = async (grupoId, email) => {
-        let participante = participantes.find(o => o.grupoId == grupoId && o.email == email)
-        return participante ?? false;
+        const participante = await apiService.get("/participantes",{grupoId:grupoId,email:email})
+        return participante?.content ?? false;
     }
     
     getOneById = async (participanteId) => {
-        let participante = participantes.find(o => o.id == participanteId)
-        return participante ?? false;
+        const participante = await apiService.get(`/participantes/${participanteId}`)
+        return participante?.content ?? false;
     }
 
-    addParticipante = async (grupoId, data) => {
-        data.id = participantes.length + 1
+    add = async (grupoId, data) => {
         data.grupoId = grupoId
-        participantes.push(data)
-        return {...data};
+        const newditem = await apiService.post(`/participantes`,data)
+        return newditem.content;
     }
 
-    removeParticipante = async (grupoId, participanteId) => {
-        let result = false;
-        let participanteidx = participantes.findIndex(o => o.id == participanteId && o.grupoId == grupoId )
-        if (participanteidx > 0) {
-            participantes.splice(participanteidx, 1);
-            result = true;
-        }
-        return result;
+    remove = async (id) => {
+        const newditem = await apiService.put(`/participantes/${id}`,{ativo:false})
+        return newditem.content.id;
     }
 }
 

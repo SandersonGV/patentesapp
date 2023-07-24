@@ -1,71 +1,3 @@
-const dinamicas = [
-    { id:0, nome: "RPG", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] },
-    { id:1, nome: "Card", jogos: ["perdido na ilha", "salvando a quebrada", "problema na empresa"] }
-]
-
-const jogos =[
-    {id:0, dinamicaId:0, nome:"perdido na ilha"},
-    {id:1, dinamicaId:0, nome:"salvando a quebrada"},
-    {id:2, dinamicaId:0, nome:"problema na empresa"},
-]
-const desafios =[
-    {id:0, jogoId:0, titulo:"desafios 1", descricao:"descricao"},
-    {id:1, jogoId:0, titulo:"desafios 2", descricao:"descricao"},
-    {id:2, jogoId:0, titulo:"desafios 3", descricao:"descricao"},
-    {id:3, jogoId:0, titulo:"desafios 4", descricao:"descricao"},
-    {id:4, jogoId:0, titulo:"desafios 5", descricao:"descricao"},
-    {id:5, jogoId:0, titulo:"desafios 6", descricao:"descricao"},
-    {id:6, jogoId:0, titulo:"desafios 7", descricao:"descricao"},
-    {id:7, jogoId:0, titulo:"desafios 8", descricao:"descricao"},
-    {id:8, jogoId:0, titulo:"desafios 9", descricao:"descricao"},
-    {id:9, jogoId:0, titulo:"desafios 10", descricao:"descricao"},
-]
-const opcoes =[
-    {id:0, desafioId:0, valor:"A", descricao:"opção A"},
-    {id:1, desafioId:0, valor:"B", descricao:"opção A"},
-    {id:2, desafioId:0, valor:"C", descricao:"opção A"},
-    {id:3, desafioId:0, valor:"D", descricao:"opção A"},
-]
-
-
-const grupos = [
-    {
-        id: 0,
-        data: "10/07/2023",
-        dinamica: "RPG",
-        jogo: "perdido na ilha",
-        cliente: "Google",
-        monitor: "Jairo",
-    },
-    {
-        id: 1,
-        data: "09/07/2023",
-        dinamica: "RPG",
-        jogo: "salvando a quebrada",
-        cliente: "C&A",
-        monitor: "Julius",
-    },
-]
-
-const participantes = [
-    {
-        id: 0, grupoId: 0, nome: "teste", email: "teste@teste.com"
-    },
-    {
-        id: 1, grupoId: 0, nome: "teste2", email: "teste@teste2.com"
-    },
-    {
-        id: 3, grupoId: 1, nome: "teste1", email: "teste@teste3.com"
-    },
-    {
-        id: 4, grupoId: 1, nome: "teste3", email: "teste@teste32.com"
-    },
-]
-
-const respostas = [
-    { participanteid: 1, respostas: ["A", "B", "C", "D", "A"] },
-]
-
 const analiseDisc = [
     {
         id: "A",
@@ -241,4 +173,4 @@ const analiseDisc = [
     }
 ]
 
-module.exports = { grupos, participantes, respostas, dinamicas, analiseDisc,jogos,desafios,opcoes }
+module.exports = {  analiseDisc }

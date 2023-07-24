@@ -1,22 +1,50 @@
 <div id="desafioapp">
-    <div class="mb-3" v-for="item,idx in desafioList" :key="idx" v-show="idx==currentStep">
-        <h2 class="form-label d-block">Desafio \{{idx+1}}</h2>
-        <div class="list-group">
-            <div v-for="participante,idx3 in participantes" :key="idx3"
-                class="list-group-item d-flex justify-content-between align-items-center">
-                <div>\{{participante.nome}}</div>
-                <div>
-                    <div class="form-check mt-3 form-check-inline" v-for="item2,idx2 in item" :key="idx2">
-                        <input class="form-check-input" :id="participante.nome+participante.id+''+item2+(idx+1)" type="radio"
-                            :name="'desafio'+participante.nome+(idx+1)+''+participante.id" :value="item2"
-                            v-model="participante.respostas[idx]" />
-                        <label class="form-check-label" :for="participante.nome+participante.id+''+item2+(idx+1)">\{{item2}}</label>
-                    </div>
-                </div>
+    <div class="d-grid gap-2 d-flex justify-content-end align-items-end">
+        <h2 class="form-label d-block fs-5">Dinamica: \{{jogo.dinamica?.nome||""}} - \{{jogo.nome||""}}</h2>
+        <div>
+            <div class="dropdown">
+                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><button @click="reset" class="dropdown-item" type="button"><i class="bi bi-arrow-clockwise"></i>
+                            Resetar</button></li>
+                    <li><a href="/grupos/detail/{{grupoId}}" class="dropdown-item" type="button"><i class="bi bi-box-arrow-left"></i> Sair</a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="d-grid gap-2 mt-3">
-            <button v-if="currentStep==configDesafio.quantidadeDesafios-1" class="btn btn-primary btn-sm" type="button"
+    </div>
+    <div class="mb-3" v-for="item,idx in desafioList" :key="idx" v-show="idx==currentStep">
+        <div class="card mx-4">
+            <div class="card-body">
+                <h3 class="card-title fs-3">\{{item.titulo}}</h3>
+                <span class="fst-italic card-text">\{{item.descricao}}</span>
+            </div>
+        </div>
+
+        <div class="card m-4" v-for="participante,idx3 in participantes" :key="idx3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-person-circle"></i><span class="text-capitalize">
+                        \{{participante.nome}}</span></h5>
+                <p class="card-text" style="display: none;">
+                    \{{participante.resposta[idx].desafioId = item.id}}
+                </p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" v-for="opcao,idx2 in item.opcoes" :key="idx2">
+                    <input class="form-check-input" :id="participante.nome+participante.id+''+opcao.valor+(idx+1)"
+                        type="radio" :name="'desafio'+participante.nome+(idx+1)+''+participante.id" :value="opcao.valor"
+                        v-model="participante.resposta[idx].valor" />
+                    <label class="form-check-label"
+                        :for="participante.nome+participante.id+''+opcao.valor+(idx+1)">\{{opcao.descricao}}</label>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="d-grid gap-2 m-4">
+            <button v-if="currentStep==desafioList.length-1" class="btn btn-primary btn-sm" type="button"
                 @click="enviarResposta">Enviar</button>
             <button v-else class="btn btn-primary btn-sm" type="button" @click="proximoDesafio">Proximo</button>
         </div>
@@ -29,23 +57,14 @@
         el: '#desafioapp',
         data: {
             loadingPage: true,
-            configDesafio: {
-                quantidadeDesafios: 10,
-                respostas: ["A", "B", "C", "D"]
-            },
             desafioList: [],
             participantes: [],
-            grupo: {},
+            jogo: {},
             currentStep: 0
         },
         methods: {
             async loadPage() {
                 await this.getGrupo();
-                for (let i = 0; i < this.configDesafio.quantidadeDesafios; i++) {
-                    let item = {};
-                    this.desafioList.push(this.configDesafio.respostas);
-                }
-
                 let objetoArmazenado = localStorage.getItem('dataResposta{{grupoId}}');
                 if (objetoArmazenado !== null) {
                     const { participantes, currentStep } = JSON.parse(objetoArmazenado);
@@ -54,15 +73,21 @@
                 }
             },
             async getGrupo() {
-                const result = await fetch(`/participantes/getAll/{{grupoId}}`)
+                const result = await fetch(`/grupos/getOne/{{grupoId}}`)
                 const data = await result.json()
-                this.participantes = data.map(o => {
-                    o.respostas = []
-                    return o
-                });
+                this.jogo = data.jogo;
+                this.desafioList = data.jogo.desafios
+                this.participantes = data.participantes;
+
+                for (const item of this.participantes) {
+                    item.resposta = this.desafioList.map(o => { return { valor: "", desafioId: "" } })
+                }
+
+                this.participantes
+                console.log(data)
             },
             async proximoDesafio() {
-                let isvalid = this.participantes.filter(o => !o.respostas[this.currentStep])
+                let isvalid = this.participantes.filter(o => !o.resposta[this.currentStep].valor)
                 if (isvalid.length > 0) {
                     showMessageToast('warning', 'preencha uma das opções')
                     return
@@ -70,8 +95,12 @@
                 this.currentStep++;
                 localStorage.setItem('dataResposta{{grupoId}}', JSON.stringify({ participantes: this.participantes, currentStep: this.currentStep }))
             },
+            async reset() {
+                localStorage.removeItem('dataResposta{{grupoId}}');
+                location.reload();
+            },
             async enviarResposta() {
-                let isvalid = this.participantes.filter(o => !o.respostas[this.currentStep])
+                let isvalid = this.participantes.filter(o => !o.resposta[this.currentStep].valor)
                 if (isvalid.length > 0) {
                     showMessageToast('warning', 'preencha uma das opções')
                     return
@@ -84,8 +113,17 @@
                     body: JSON.stringify({ participantes: this.participantes }),
                 });
                 if (result.ok) {
-                    localStorage.removeItem('dataResposta{{grupoId}}');
-                    location.replace("/grupos/detail/{{grupoId}}")
+                    const closegrupo = await fetch(`/grupos/edit/{{grupoId}}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ status: 2 }),
+                    });
+                    if (closegrupo.ok) {
+                        localStorage.removeItem('dataResposta{{grupoId}}');
+                        location.replace("/grupos/detail/{{grupoId}}")
+                    }
                 }
             },
         },

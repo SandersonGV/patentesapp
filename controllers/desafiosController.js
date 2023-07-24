@@ -8,44 +8,56 @@ router.get('/detail/:id', (req, res) => {
   res.render('potentes/admin/desafio/index', { layout: 'main-admin', data: { id: id } });
 });
 
-router.get('/getAll', async (req, res) => {
-  let data = await DesafioService.getAll();
-  res.json(data)
-});
-
-router.get('/getOne/:id', async (req, res) => {
-  let { id } = req.params
-  let data = await DesafioService.getOne(id);
-  data.opcoes = await OpcaoService.getAll(id)
-  res.json(data)
-});
-
-router.post('/add/:jogoId', async (req, res) => {
-  let { jogoId } = req.params
-  let { data } = req.body
-  let dataResult = await DesafioService.add(jogoId,data);
-  for (const opcao of data.opcoes) {
-      await OpcaoService.add(data.id,opcao)
+router.get('/getAll', async (req, res, next) => {
+  try {
+    let data = await DesafioService.getAll();
+    res.status(200).json(data)
+  } catch (error) {
+    next(error)
   }
-  data.opcoes
-  res.json(dataResult)
 });
 
-router.post('/edit/:jogoId', async (req, res) => {
-  let { jogoId } = req.params
-  let { data } = req.body
-  let dataResult = await DesafioService.add(jogoId,data);
-  for (const opcao of data.opcoes) {
-      await OpcaoService.add(data.id,opcao)
+router.get('/getOne/:id', async (req, res, next) => {
+  try {
+    let { id } = req.params
+    let data = await DesafioService.getOne(id);
+    res.status(200).json(data)
+  } catch (error) {
+    next(error)
   }
-  data.opcoes
-  res.json(dataResult)
 });
 
-router.get('/remove/:jogoId/:id', async (req, res) => {
-  let { jogoId,id } = req.params
-  let dataResult = await DesafioService.remove(jogoId,id);
-  res.json(dataResult)
+router.post('/add/:jogoId', async (req, res, next) => {
+  try {
+    let { jogoId } = req.params
+    let { data } = req.body
+    data.jogoId = jogoId;
+    let dataResult = await DesafioService.add(data);
+    res.status(200).json(dataResult)
+  } catch (error) {
+    next(error)
+  }
+});
+
+router.post('/edit/:jogoId', async (req, res, next) => {
+  try {
+    let { data } = req.body
+    let id = data.id
+    let dataResult = await DesafioService.edit(id, data);
+    res.status(200).json(dataResult)
+  } catch (error) {
+    next(error)
+  }
+});
+
+router.get('/remove/:id', async (req, res, next) => {
+  try {
+    let { id } = req.params
+    let dataResult = await DesafioService.remove(id);
+    res.status(200).json(dataResult)
+  } catch (error) {
+    next(error)
+  }
 });
 
 module.exports = router;

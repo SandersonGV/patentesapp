@@ -1,25 +1,32 @@
-const { dinamicas} = require("../repository/potentesdb")
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 
 class DinamicaService {
     getAll = async () => {
-        return dinamicas;
+        const item = await apiService.get("/dinamicas")
+        return item.content;
     }
 
     getOne = async (id) => {
-       let dinamica =  dinamicas.find(o => o.id == id);
-        return  {...dinamica}
+        const item = await apiService.get(`/dinamicas/${id}`)
+        return  item.content
     }
 
-    Add = async (item) => {
-        item.id= dinamicas.length + 1
-        dinamicas.push(item)
-        return dinamicas;
+    add = async (item) => {
+        const newditem = await apiService.post(`/dinamicas`,item)
+        return newditem.content;
+    }
+
+    edit = async (id, item) => {
+        const newditem = await apiService.put(`/dinamicas/${id}`,item)
+        return newditem.content;
     }
 
     remove = async (id) => {
-        let idx = dinamicas.findIndex(o => o.id == id);
-        dinamicas.splice(idx, 1);
-        return idx;
+        const newditem = await apiService.put(`/dinamicas/${id}`,{ativo:false})
+        return newditem.content.id;
     }
 }
 

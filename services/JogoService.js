@@ -1,31 +1,33 @@
-const {jogos} = require("../repository/potentesdb")
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 
 class JogosService {
     getAll = async (dinamicaId) => {
-        let jogo = jogos.filter(o => o.dinamicaId == dinamicaId)
-        return jogo ?? false;
+        const item = await apiService.get("/jogos",{dinamicaId:dinamicaId})
+        return item.content ?? false;
     }
     
     getOne = async (id) => {
-        let jogo = jogos.find(o => o.id == id)
-        return jogo ?? false;
+        const item = await apiService.get(`/jogos/${id}`)
+        return item.content ?? false;
     }
 
     add = async (dinamicaId, data) => {
-        data.id = jogos.length + 1
         data.dinamicaId = dinamicaId
-        jogos.push(data)
-        return {...data};
+        const newditem = await apiService.post(`/jogos`,data)
+        return {...newditem.content};
     }
 
-    remove= async (dinamicaId, id) => {
-        let result = false;
-        let jogoidx = jogos.findIndex(o => o.id == id && o.dinamicaId == dinamicaId )
-        if (jogoidx > 0) {
-            jogos.splice(jogoidx, 1);
-            result = true;
-        }
-        return result;
+    edit = async (id, item) => {
+        const newditem = await apiService.put(`/jogos/${id}`,item)
+        return newditem.content;
+    }
+
+    remove= async (id) => {
+        const newditem = await apiService.put(`/jogos/${id}`,{ativo:false})
+        return newditem.content.id;
     }
 }
 

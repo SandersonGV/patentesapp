@@ -1,31 +1,25 @@
-const {respostas } = require("../repository/potentesdb")
+
+const ApiService = require("./ApiService")
+require('dotenv').config()
+const {POTENTES_API_URL} = process.env
+const apiService = new ApiService(POTENTES_API_URL)
 
 class RespostaService {
-    getOne = async (participanteid) => {
-        let resposta = respostas.find(o => o.participanteid == participanteid);
-        return resposta||false;
+    getAll = async (participanteid) => {
+        const respostas = await apiService.get("/respostas",{participanteid:participanteid})
+        return respostas.content ?? false;
     }
 
-    addResposta = async (participanteid, respostaslist) => {
-        let result = false
-        let resposta = respostas.find(o => o.participanteid == participanteid);
-
-        if (resposta) {
-            resposta.respostas = respostaslist;
-            result = true;
-        }else{
-            resposta = {participanteid:participanteid,respostas:respostaslist}
-            respostas.push(resposta)
-            result = true;
-        }
-        return result;
-    }
-    
     addRespostaGrupo = async (participantes) => {
-        for (const part of participantes) {
-            this.addResposta(part.id,part.respostas)
+        let data = []
+        for(let p of participantes){
+            p.resposta.map(o=>{
+                o.participanteId = p.id
+                data.push(o)
+            });
         }
-        return true;
+        const newditem = await apiService.post(`/respostas`,data)
+        return newditem.content ?? false;
     }
 
 }

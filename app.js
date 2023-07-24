@@ -23,6 +23,9 @@ const desafiosController = require('./controllers/desafiosController');
 const jogosController = require('./controllers/jogosController');
 const clientesController = require('./controllers/clientesController');
 
+// Configurando o middleware para servir arquivos estáticos na pasta "public"
+app.use(express.static('public'));
+
 // Configurar rotas
 app.use('/', indexRouter);
 app.use('/grupos', gruposController);
@@ -35,6 +38,14 @@ app.use('/admin', adminController);
 app.use('/admin/dinamicas', dinamicasController);
 app.use('/admin/jogos', jogosController);
 app.use('/admin/desafios', desafiosController);
+
+//error handling
+app.use((error, req, res, next) => {
+  console.log(error);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  res.status(status).json({ message: message });
+});
 
 // Iniciar o servidor
 const port = 3000;
