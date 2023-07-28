@@ -5,51 +5,82 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Potentes App</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link href="/css/style.css" rel="stylesheet" />
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        body {
-            background:
-                radial-gradient(black 15%, transparent 16%) 0 0,
-                radial-gradient(black 15%, transparent 16%) 8px 8px,
-                radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 0 1px,
-                radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 8px 9px;
-            background-color: #282828;
-            background-size: 16px 16px;
-        }
-    </style>
+    <!-- Vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
-    <div class="container px-5 my-5">
-        <div class="row justify-content-center">
-            <div class="text-uppercase text-light text-center fs-1">Potentes.App - cliente</div>
-            <div class="col-12">
-                <div class="card border-0 rounded-3 shadow-lg">
-                    <div class="card-header">
-                        <nav class="nav">
-                            <a class="nav-link" href="/clientes">Home</a>
-                            <a class="nav-link" href="/grupos">Grupos</a>
-                            <a class="nav-link disabled">Relatorios</a>
-                        </nav>
-                    </div>
-                    <div class="card-body p-4">
+    <div class="site-container">
+        <div class="topArea bg-black text-light">
+            <nav class="navbar navbar-expand-md navbar-dark ">
+                <a class="navbar-brand ps-2" href="#">Potentes.App - admin</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-                        {{{body}}}
-                    </div>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Seja bem vindo, {{user.nome}} 
+                            </a>
+                            <!-- Here's the magic. Add the .animate and .slideIn classes to your .dropdown-menu and you're all set! -->
+                            <div class="dropdown-menu dropdown-menu-end animate slideIn"
+                                aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item disabled" href="#"><i class="bi bi-person"></i> Perfil</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-left"></i> Sair</a>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
+            </nav>
+        </div>
+        <div class="menuArea bg-light p-3">
+            <ul class="nav flex-column nav-pills" role="tablist">
+                {{#each menu}}
+                <li class="nav-item">
+                    <a class="nav-link {{#if isActive}} active {{/if}} {{#if disabled}} disabled {{/if}}" href="{{url}}">
+                        <i class="bi bi-{{icon}}"></i> {{nome}}
+                    </a>
+                </li>
+                {{/each}}
+            </ul>
+
+        </div>
+        <div class="contentArea">
+                <div class="card m-4">
+        <div class="card-body">
+                {{{body}}}
+            </div>
             </div>
         </div>
+        <div class="footerArea bg-light">
+            <footer id="sticky-footer" class="flex-shrink-0 py-4 bg-dark text-white-50">
+                <div class="container text-center">
+                    <small>Copyright &copy; Maloca Games</small>
+                </div>
+            </footer>
+        </div>
     </div>
-        <script src="/js/util.js" ></script>
-
+    <script src="/js/util.js"></script>
 </body>
 
 </html>

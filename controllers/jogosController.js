@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/detail/:id', (req, res, next) => {
   try {
     let { id } = req.params
-    res.render('potentes/admin/jogo/index', { layout: 'main-admin', data: { id: id } });
+    res.render('potentes/admin/jogo/index', { data: { id: id } });
   } catch (error) {
     next(error)
   }

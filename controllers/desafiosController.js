@@ -1,11 +1,10 @@
 const express = require('express');
-const OpcaoService = require('../services/OpcaoService');
 const DesafioService = require('../services/DesafioService');
 const router = express.Router();
 
 router.get('/detail/:id', (req, res) => {
   let { id } = req.params
-  res.render('potentes/admin/desafio/index', { layout: 'main-admin', data: { id: id } });
+  res.render('potentes/admin/desafio/index', {  data: { id: id } });
 });
 
 router.get('/getAll', async (req, res, next) => {

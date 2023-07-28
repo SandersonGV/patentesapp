@@ -49,7 +49,7 @@ router.get('/getOne/:grupoId', async (req, res, next) => {
   try {
     let { grupoId } = req.params
     let data = await GrupoService.getOne(grupoId);
-    res.json(data)
+    res.status(200).json(data)
     
   } catch (error) {
     next(error)

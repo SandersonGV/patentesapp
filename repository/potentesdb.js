@@ -1,3 +1,13 @@
+const menuList = [
+    {id:1, tipo: [0,1], nome: "Dashboard", url:"/admin/dashboard", icon:"speedometer2", disabled:false},
+    {id:2, tipo: [0,1], nome: "Clientes", url:"/admin/clientes", icon:"house", disabled:false},
+    {id:3, tipo: [0,1], nome: "Usuarios", url:"/admin/usuarios", icon:"person-square", disabled:false},
+    {id:4, tipo: [0,1], nome: "Dinamicas", url:"/admin/dinamicas", icon:"puzzle", disabled:false},
+    {id:5, tipo: [2], nome: "Dashboard", url:"/clientes", icon:"speedometer2", disabled:false},
+    {id:6, tipo: [0,1,2], nome: "Grupos", url:"/grupos", icon:"person-rolodex", disabled:false},
+    {id:7, tipo: [0,1,2], nome: "Relatorios", url:"/relatorios", icon:"clipboard-data", disabled:true},
+]
+
 const analiseDisc = [
     {
         id: "A",
@@ -173,4 +183,4 @@ const analiseDisc = [
     }
 ]
 
-module.exports = {  analiseDisc }
+module.exports = {  analiseDisc,menuList }

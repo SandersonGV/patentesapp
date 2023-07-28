@@ -1,59 +1,54 @@
 <div id="gruposapp">
-    <div class="card mx-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">Lista de Grupos</h2>
-                <div>
-                    <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i
-                            class="bi bi-plus"></i>
-                        Grupo</button>
-                </div>
-            </div>
-
-            <table class="table mt-4">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Data</th>
-                        <th scope="col">Dinamica</th>
-                        <th scope="col">Jogo</th>
-                        <th scope="col">Cliente</th>
-                        <th scope="col">Monitor</th>
-                        <th scope="col">Qtd participantes</th>
-                        <th style="width: 1%" scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item,index in grupos" :key="index">
-                        <th scope="row">\{{item.id}}</th>
-                        <td>\{{item.data?item.data.split("T")[0].split("-").reverse().join("/"):""}}</td>
-                        <td>\{{item.jogo.dinamica.nome}}</td>
-                        <td>\{{item.jogo.nome}}</td>
-                        <td>\{{item.cliente}}</td>
-                        <td>\{{item.monitor}}</td>
-                        <td>\{{item?.participantes ? item.participantes.length : 0}} <span
-                                :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">\{{status.find(o=>o.id
-                                ==item.status).descricao}}</span> </td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a :href="'/grupos/detail/'+item.id" class="dropdown-item" type="button"><i
-                                                class="bi bi-eye"></i>
-                                            Visualisar</a></li>
-                                    <li><button @click="removeGrupo(item.id)" class="dropdown-item text-danger"
-                                            type="button"><i class="bi bi-trash"></i> Remover</button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Lista de Grupos</h2>
+        <div>
+            <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i>
+                Grupo</button>
         </div>
     </div>
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data</th>
+                <th scope="col">Dinamica</th>
+                <th scope="col">Jogo</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Monitor</th>
+                <th scope="col">Qtd participantes</th>
+                <th style="width: 1%" scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item,index in grupos" :key="index">
+                <th scope="row">\{{item.id}}</th>
+                <td>\{{item.data?item.data.split("T")[0].split("-").reverse().join("/"):""}}</td>
+                <td>\{{item.jogo.dinamica.nome}}</td>
+                <td>\{{item.jogo.nome}}</td>
+                <td>\{{item.cliente}}</td>
+                <td>\{{item.monitor}}</td>
+                <td>\{{item?.participantes ? item.participantes.length : 0}} <span
+                        :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">\{{status.find(o=>o.id
+                        ==item.status).descricao}}</span> </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a :href="'/grupos/detail/'+item.id" class="dropdown-item" type="button"><i
+                                        class="bi bi-eye"></i>
+                                    Visualisar</a></li>
+                            <li><button @click="removeGrupo(item.id)" class="dropdown-item text-danger" type="button"><i
+                                        class="bi bi-trash"></i> Remover</button>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <!-- Modal -->
     <div class="modal fade" id="addGrupo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -89,12 +84,12 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" v-model="novoGrupo.cliente">
-                        <label class="text-capitalize">cliente</label>
+                        <input type="text" class="form-control " disabled :value="clientes.find(o=>o.id == novoGrupo.clienteId)?clientes.find(o=>o.id == novoGrupo.clienteId).nome:'' ">
+                        <label class="text-capitalize">Cliente</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" v-model="novoGrupo.monitor">
+                        <input type="text" class="form-control " disabled v-model="novoGrupo.monitor" value="{{user.nome}}">
                         <label class="text-capitalize">monitor</label>
                     </div>
 
@@ -109,7 +104,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -120,8 +114,9 @@
             loadingPage: true,
             grupos: [],
             dinamicas: [],
-            novoGrupo: { data: "", dinamica: "", jogo: "", cliente: "", monitor: "" },
+            novoGrupo: { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}", monitor: "{{user.nome}}" },
             addGrupoModal: {},
+            clientes:[],
             status: [
                 { id: 1, descricao: "Aberto", tag: "primary" },
                 { id: 2, descricao: "Em Analise", tag: "warning" },
@@ -130,7 +125,7 @@
         },
         methods: {
             async loadPage() {
-                await Promise.all([this.getGrupos(), this.getDinamicas()])
+                await Promise.all([this.getGrupos(), this.getDinamicas(), this.getClientes()])
             },
             async getGrupos() {
                 const result = await fetch(`/grupos/getAll`)
@@ -142,8 +137,13 @@
                 const data = await result.json()
                 this.dinamicas = data;
             },
+            async getClientes() {
+                const result = await fetch(`/admin/clientes/getAll`)
+                const data = await result.json()
+                this.clientes = data;
+            },
             async openGrupoModal() {
-                this.novoGrupo = { data: "", dinamica: "", jogo: "", cliente: "", monitor: "" }
+                this.novoGrupo = { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}", monitor: "{{user.nome}}" }
                 this.addGrupoModal = new bootstrap.Modal('#addGrupo')
                 this.addGrupoModal.show()
             },

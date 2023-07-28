@@ -1,22 +1,22 @@
 const express = require('express');
-const DinamicaService = require('../services/DinamicaService');
 const router = express.Router();
+const UsuarioService = require('../services/UsuarioService');
+const menuName = "Usuarios";
 
 router.get('/', (req, res) => {
-  res.render('potentes/admin/dinamica/index', {  });
+  res.render('potentes/admin/usuario/index', {  });
 });
 
-router.get('/detail/:id', (req, res) => {
-  let { id } = req.params
-  res.render('potentes/admin/dinamica/detail', {  data: { id: id } });
-});
 
 router.get('/getOne/:id', async (req, res, next) => {
   try {
     let { id } = req.params
-    let data = await DinamicaService.getOne(id);
+    let data = await UsuarioService.getOne(id);
+    if(data){
+      delete data.password
+    }
     res.status(200).json(data)
-
+    
   } catch (error) {
     next(error)
   }
@@ -24,9 +24,9 @@ router.get('/getOne/:id', async (req, res, next) => {
 
 router.get('/getAll', async (req, res, next) => {
   try {
-    let data = await DinamicaService.getAll();
-    res.status(200).json(data)
-
+    let data = await UsuarioService.getAll();
+    res.json(data)
+    
   } catch (error) {
     next(error)
   }
@@ -34,10 +34,10 @@ router.get('/getAll', async (req, res, next) => {
 
 router.post('/add', async (req, res, next) => {
   try {
-    let { data } = req.body
-    let dataResult = await DinamicaService.add(data);
-    res.status(200).json(dataResult)
-
+    let data  = req.body
+    let dataResult = await UsuarioService.add(data);
+    res.json(dataResult)
+    
   } catch (error) {
     next(error)
   }
@@ -46,10 +46,10 @@ router.post('/add', async (req, res, next) => {
 router.post('/edit/:id', async (req, res, next) => {
   try {
     let { id } = req.params
-    let { data } = req.body
-    let dataResult = await DinamicaService.edit(id, data);
-    res.status(200).json(dataResult)
-
+    let  data  = req.body
+    let dataResult = await UsuarioService.edit(id, data);
+    res.json(dataResult)
+    
   } catch (error) {
     next(error)
   }
@@ -58,11 +58,11 @@ router.post('/edit/:id', async (req, res, next) => {
 router.get('/remove/:id', async (req, res, next) => {
   try {
     let { id } = req.params
-    let dataResult = await DinamicaService.remove(id);
-    res.status(200).json(dataResult)
+    let dataResult = await UsuarioService.remove(id);
+    res.json(dataResult)
+    
   } catch (error) {
     next(error)
   }
 });
-
 module.exports = router;

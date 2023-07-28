@@ -1,0 +1,164 @@
+<div id="clientesapp">
+    <div class="card m-4">
+        <div class="card-body">
+            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+                <h3 class="me-md-2">Clientes</h3>
+                <div>
+                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                            class="bi bi-file-earmark-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <table class="table mt-2">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Maximo de monitores</th>
+                        <th scope="col">Maximo de grupos</th>
+                        <th style="width: 1%" scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item,index in clientes" :key="index">
+                        <th scope="row">\{{index+1}}</th>
+                        <td>\{{item.nome}}</td>
+                        <td>\{{item.maxMonitores}}</td>
+                        <td>\{{item.maxGrupos}}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
+                                                class="bi bi-eye"></i>
+                                            Visualisar</button></li>
+                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
+                                            type="button"><i class="bi bi-trash"></i> Remover</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel" v-if="action=='edit'">Editar</h1>
+                    <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel" v-else>Novo</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="cliente.nome">
+                        <label for="floatingInput">nome</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="cliente.maxMonitores">
+                        <label for="floatingInput">maxMonitores</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" v-model="cliente.maxGrupos">
+                        <label for="floatingInput">maxGrupos</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i>
+                        Cancelar</button>
+                    <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    var app = new Vue({
+        el: '#clientesapp',
+        data: {
+            loadingPage: true,
+            clientes: [],
+            cliente: {},
+            addModal: {},
+            action: "",
+        },
+        methods: {
+            async loadPage() {
+                const result = await fetch(`/admin/clientes/getAll`)
+                const data = await result.json()
+                this.clientes = data;
+            },
+            async openAddModal() {
+                this.action = "add";
+                this.cliente = {}
+                this.addModal = new bootstrap.Modal('#adModal')
+                this.addModal.show()
+            },
+            async openEditModal(id) {
+                this.action = "edit";
+                this.cliente = await this.getCliente(id)
+                this.addModal = new bootstrap.Modal('#adModal')
+                this.addModal.show()
+            },
+            async save() {
+                let validaResult = validaOjeto(this.cliente);
+                if (validaResult.length > 0) {
+                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                    return
+                }
+                
+                let url = `/admin/clientes/add`
+                if(this.action=='edit'){
+                    url = `/admin/clientes/edit/${this.cliente.id}`
+                }
+                let payload = { ... this.cliente }
+                const result = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ...payload }),
+                });
+                if (result.ok) {
+                    const data = await result.json()
+                    this.loadPage();
+                    this.cliente = {}
+                    this.addModal.hide()
+                    showMessageToast('success', 'item adicionado!')
+                }
+            },
+            async remove(id) {
+                let questionResult = await ShowQuestion("Deseja realmente remover este item?");
+                if (!questionResult)
+                    return
+                const result = await fetch(`/admin/clientes/remove/${id}`);
+                if (result.ok) {
+                    this.loadPage();
+                    showMessageToast('success', 'item removido!')
+                }
+            },
+            async getCliente(id) {
+                const result = await fetch(`/admin/clientes/getOne/${id}`)
+                const data = await result.json()
+                return data;
+            }
+
+        },
+        mounted() {
+            this.loadPage();
+        }
+    })
+
+</script>
