@@ -1,42 +1,34 @@
 <div id="gruposapp">
-    <div class="card mx-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">Participante</h2>
-                <div>
-                    <a :href="'/grupos/detail/'+participante.grupoId" class="btn btn-primary" type="button"><i
-                            class="bi bi-arrow-left"></i></a>
-                </div>
-            </div>
-            <div><span class="fw-semibold">Nome:</span> \{{participante.nome}}</div>
-            <div><span class="fw-semibold">Email:</span> \{{participante.email}}</div>
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Participante</h2>
+        <div>
+            <a :href="'/grupos/detail/'+participante.grupoId" class="btn btn-primary" type="button"><i
+                    class="bi bi-arrow-left"></i></a>
         </div>
     </div>
-    <div class="card m-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-                <h3 class="me-md-2">Avaliação da dinamica</h3>
-            </div>
-            <div v-if="participante?.resposta && participante.resposta.length == 0">
-                <span>Nenhuma resposta em contrada</span>
-            </div>
-            <ul class="list-group " v-else>
-                <li v-for="item,index in analise" :key="index"
-                    class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <div class="fw-bold">\{{item.sigla+" - "+item.titulo}}</div>
-                        <ul>
-                            <li v-for="listitem,idx in item.texto[Math.floor(percentualLetra[item.id]/25)||0]"
-                                :key="idx">
-                                \{{listitem}}
-                            </li>
-                        </ul>
-                    </div>
-                    <span class="badge bg-primary rounded-pill">\{{(Math.floor(percentualLetra[item.id])||0)+"%"}}</span>
-                </li>
-            </ul>
-        </div>
+    <div><span class="fw-semibold">Nome:</span> \{{participante.nome}}</div>
+    <div><span class="fw-semibold">Email:</span> \{{participante.email}}</div>
+    <hr>
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h3 class="me-md-2">Avaliação da dinamica</h3>
     </div>
+    <div v-if="participante?.resposta && participante.resposta.length == 0">
+        <span>Nenhuma resposta em contrada</span>
+    </div>
+    <ul class="list-group " v-else>
+        <li v-for="item,index in analise" :key="index"
+            class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">\{{item.sigla+" - "+item.titulo}}</div>
+                <ul>
+                    <li v-for="listitem,idx in item.texto[Math.floor(percentualLetra[item.id]/25)||0]" :key="idx">
+                        \{{listitem}}
+                    </li>
+                </ul>
+            </div>
+            <span class="badge bg-primary rounded-pill">\{{(Math.floor(percentualLetra[item.id])||0)+"%"}}</span>
+        </li>
+    </ul>
 </div>
 
 <script>
@@ -56,7 +48,7 @@
                 const data = await result.json()
                 this.participante = data;
                 if (this.participante.resposta.length > 0) {
-                    this.percentualLetra = await this.getPercentages(this.participante.resposta.map(o=>o.valor));
+                    this.percentualLetra = await this.getPercentages(this.participante.resposta.map(o => o.valor));
                     await this.getAnalise();
                 }
             },

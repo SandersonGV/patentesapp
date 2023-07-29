@@ -7,10 +7,8 @@
                     <i class="bi bi-three-dots-vertical"></i>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><button @click="reset" class="dropdown-item" type="button"><i class="bi bi-arrow-clockwise"></i>
-                            Resetar</button></li>
-                    <li><a href="/grupos/detail/{{grupoId}}" class="dropdown-item" type="button"><i
-                                class="bi bi-box-arrow-left"></i> Sair</a>
+                    <li><a href="/grupos/detail/{{grupoId}}" class="dropdown-item" type="button">
+                            <i class="bi bi-arrow-left"></i> Voltar</a>
                     </li>
                 </ul>
             </div>
@@ -44,15 +42,62 @@
             </ul>
         </div>
 
-        <div class="d-grid gap-2 m-4">
-            <button v-if="currentStep==desafioList.length-1" class="btn btn-primary btn-sm" type="button"
-                @click="enviarResposta">Enviar</button>
-            <button v-else class="btn btn-primary btn-sm" type="button" @click="proximoDesafio">Proximo</button>
+        <div class="d-flex gap-2 m-4">
+            <button :disabled="currentStep==0" class="btn btn-warning btn-sm flex-fill" type="button"
+                @click="anteriorDesafio"><i class="bi bi-arrow-left"></i> Anterior</button>
+            <button v-if="currentStep==desafioList.length-1" :disabled="enviando"
+                class="btn btn-success btn-sm flex-fill" type="button" @click="enviarResposta"><i
+                    class="bi bi-send"></i> Enviar</button>
+            <button v-else class="btn btn-primary btn-sm flex-fill" type="button" @click="proximoDesafio">Proximo<i
+                    class="bi bi-arrow-right"></i> </button>
         </div>
     </div>
 </div>
 
 <script>
+    class LocalStorageCRUD {
+        constructor(databaseName) {
+            this.databaseName = databaseName;
+            this.database = JSON.parse(localStorage.getItem(databaseName)) || [];
+        }
+
+        save() {
+            localStorage.setItem(this.databaseName, JSON.stringify(this.database));
+        }
+
+        create(item) {
+            this.database.push(item);
+            this.save();
+        }
+
+        read(id) {
+            if (id === undefined) {
+                return this.database;
+            } else {
+                return this.database.find((item) => item.id === id);
+            }
+        }
+
+        update(id, newItem) {
+            const index = this.database.findIndex((item) => item.id === id);
+            if (index !== -1) {
+                this.database[index] = { ...this.database[index], ...newItem };
+                this.save();
+                return true;
+            }
+            return false;
+        }
+
+        delete(id) {
+            const index = this.database.findIndex((item) => item.id === id);
+            if (index !== -1) {
+                this.database.splice(index, 1);
+                this.save();
+                return true;
+            }
+            return false;
+        }
+    }
 
     var app = new Vue({
         el: '#desafioapp',
@@ -61,16 +106,20 @@
             desafioList: [],
             participantes: [],
             jogo: {},
-            currentStep: 0
+            currentStep: 0,
+            enviando: false,
+            dataResposta: new LocalStorageCRUD('dataResposta{{grupoId}}')
         },
         methods: {
             async loadPage() {
                 await this.getGrupo();
-                let objetoArmazenado = localStorage.getItem('dataResposta{{grupoId}}');
-                if (objetoArmazenado !== null) {
-                    const { participantes, currentStep } = JSON.parse(objetoArmazenado);
+                let objetoArmazenado = this.dataResposta.read(1);
+                if (objetoArmazenado) {
+                    const { participantes, currentStep } = objetoArmazenado;
                     this.participantes = participantes;
                     this.currentStep = currentStep;
+                } else {
+                    this.dataResposta.create({ id: 1, participantes: this.participantes, currentStep: this.currentStep, inicio: new Date() })
                 }
             },
             async getGrupo() {
@@ -87,6 +136,9 @@
                 this.participantes
                 console.log(data)
             },
+            async anteriorDesafio() {
+                this.currentStep--;
+            },
             async proximoDesafio() {
                 let isvalid = this.participantes.filter(o => !o.resposta[this.currentStep].valor)
                 if (isvalid.length > 0) {
@@ -94,43 +146,65 @@
                     return
                 }
                 this.currentStep++;
-                localStorage.setItem('dataResposta{{grupoId}}', JSON.stringify({ participantes: this.participantes, currentStep: this.currentStep }))
-            },
-            async reset() {
-                localStorage.removeItem('dataResposta{{grupoId}}');
-                location.reload();
+                this.dataResposta.update(1, { participantes: this.participantes, currentStep: this.currentStep, })
             },
             async enviarResposta() {
-                let isvalid = this.participantes.filter(o => !o.resposta[this.currentStep].valor)
-                if (isvalid.length > 0) {
-                    showMessageToast('warning', 'preencha uma das opções')
-                    return
-                }
-                const result = await fetch(`/desafios/addRespostaGrupo/{{grupoId}}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ participantes: this.participantes }),
-                });
-                if (result.ok) {
+                try {
+                    this.enviando = true
+
+                    let isvalid = this.participantes.filter(o => !o.resposta[this.currentStep].valor)
+                    if (isvalid.length > 0) {
+                        showMessageToast('warning', 'preencha uma das opções')
+                        this.enviando = false
+                        return
+                    }
+
+                    showMessageToast('success', 'Enviando informações')
+                    const result = await fetch(`/desafios/addRespostaGrupo/{{grupoId}}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ participantes: this.participantes }),
+                    });
+
+                    if (!result.ok) {
+                        showMessageToast('error', 'Erro ao executar esta ação!')
+                        this.enviando = false;
+                        return
+                    }
+                    let objetoArmazenado = this.dataResposta.read(1);
+
                     const closegrupo = await fetch(`/grupos/edit/{{grupoId}}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ status: 2 }),
-                    });
-                    if (closegrupo.ok) {
-                        localStorage.removeItem('dataResposta{{grupoId}}');
-                        location.replace("/grupos/detail/{{grupoId}}")
+                        body: JSON.stringify({
+                            status: 2, userId: '{{ user.id }}',inicio: objetoArmazenado.inicio ,termino: new Date()})
+                        })
+
+                    if(!closegrupo.ok) {
+                        showMessageToast('error', 'Erro ao executar esta ação!')
+                        this.enviando = false;
+                        return
                     }
-                }
-            },
+
+                    //this.dataResposta.delete(1);
+                    //location.replace("/grupos/detail/{{grupoId}}")
+
+            } catch(e) {
+                console.log(e)
+                this.enviando = false
+            }
         },
+    },
         mounted() {
-            this.loadPage();
-        }
+        this.loadPage();
+    }
     })
+
+
+
 
 </script>

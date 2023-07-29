@@ -14,7 +14,7 @@ const userAuth = (req, res, next) => {
             } else {
                 const menu = menuList.filter(o => o.tipo.includes(decodedToken.tipo))
                 for (const m of menu) {
-                    m.isActive = m.url == req.originalUrl
+                    m.isActive = req.originalUrl.includes(m.url)
                 }
                 res.locals.menu = menu;
                 res.locals.user = decodedToken;

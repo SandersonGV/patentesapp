@@ -1,47 +1,49 @@
 <div id="dinamicassapp">
-    <div class="card mx-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">Lista de Dinamicas</h2>
-                <div>
-                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm">
-                        <i class="bi bi-file-earmark-plus"></i>
-                    </button>
-                </div>
-            </div>
-
-            <table class="table mt-4">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Nome</th>
-                        <th style="width: 1%" scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item,index in dinamicas" :key="index">
-                        <th scope="row">\{{index+1}}</th>
-                        <td>\{{item.nome}}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a :href="'/admin/dinamicas/detail/'+item.id" class="dropdown-item" type="button"><i
-                                                class="bi bi-eye"></i>
-                                            Visualisar</a></li>
-                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
-                                            type="button"><i class="bi bi-trash"></i> Remover</button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Lista de Dinamicas</h2>
+        <div>
+            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm">
+                <i class="bi bi-file-earmark-plus"></i>
+            </button>
         </div>
     </div>
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th style="width: 1%" scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-if="carregando">
+                <td colspan="8" class="text-center"><i class="bi bi-search"></i> ...Carregando lista</td>
+            </tr>
+            <tr v-else-if="!carregando && dinamicas.length==0">
+                <td colspan="8" class="text-center"><i class="bi bi-database-x"></i> Nehum item encontrado</td>
+            </tr>
+            <tr v-for="item,index in dinamicas" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.nome}}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a :href="'/admin/dinamicas/detail/'+item.id" class="dropdown-item" type="button"><i
+                                        class="bi bi-eye"></i>
+                                    Visualisar</a></li>
+                            <li><button @click="remove(item.id)" class="dropdown-item text-danger" type="button"><i
+                                        class="bi bi-trash"></i> Remover</button>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <!-- Modal -->
     <div class="modal fade" id="openAddModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -61,7 +63,10 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
                             class="bi bi-x-lg"></i>
                         Cancelar</button>
-                    <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                    <button type="button" disabled v-if="salvando" class="btn btn-primary btn-sm">
+                        <i class="bi bi-hourglass-split"></i>
+                        Salvando</button>
+                    <button type="button" @click="save" v-else class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
                         Salvar</button>
                 </div>
             </div>
@@ -79,10 +84,19 @@
             addModal: {},
             novoItem: {},
             dinamicas: [],
+            carregando: false,
+            salvando: false
         },
         methods: {
             async loadPage() {
-                await this.getDinamicas()
+                this.carregando = true;
+                try {
+                    await this.getDinamicas()
+                    this.carregando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.carregando = false;
+                }
             },
             async getDinamicas() {
                 const result = await fetch(`/admin/dinamicas/getAll`)
@@ -107,26 +121,41 @@
                 }
             },
             async save() {
-                let validaResult = validaOjeto(this.novoItem);
+                try {
+                    this.salvando = true;
+                    showMessageToast('success', 'Salvando informações!')
+                    this.addModal.hide()
 
-                if (validaResult.length > 0) {
-                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
-                    return
-                }
-                const result = await fetch(`/admin/dinamicas/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: this.novoItem }),
-                });
-                if (result.ok) {
+                    let validaResult = validaOjeto(this.novoItem);
+
+                    if (validaResult.length > 0) {
+                        ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                        this.salvando = false;
+                        return
+                    }
+                    const result = await fetch(`/admin/dinamicas/add`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ data: this.novoItem }),
+                    });
+                    if (!result.ok) {
+                        showMessageToast('error', 'Erro ao executar esta ação!')
+                        this.salvando = false;
+                        return
+                    }
                     const data = await result.json()
                     this.dinamicas.push(data);
                     this.novoItem = {}
                     this.addModal.hide()
                     showMessageToast('success', 'item adicionado!')
 
+                    this.salvando = false;
+
+                } catch (e) {
+                    console.log(e)
+                    this.salvando = false;
                 }
             },
 

@@ -2,7 +2,7 @@
     <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
         <h2 class="me-md-2">Lista de Grupos</h2>
         <div>
-            <button @click="openGrupoModal()" type="button" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i>
+            <button @click="openGrupoModal()" type="button" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i>
                 Grupo</button>
         </div>
     </div>
@@ -10,7 +10,7 @@
     <table class="table mt-4">
         <thead>
             <tr>
-                <th scope="col">ID</th>
+                <th scope="col">#</th>
                 <th scope="col">Data</th>
                 <th scope="col">Dinamica</th>
                 <th scope="col">Jogo</th>
@@ -21,16 +21,24 @@
             </tr>
         </thead>
         <tbody>
+            <tr v-if="carregando">
+                <td colspan="8" class="text-center"><i class="bi bi-search"></i> ...Carregando lista</td>
+            </tr>
+            <tr v-else-if="!carregando && grupos.length==0">
+                <td colspan="8" class="text-center"><i class="bi bi-database-x"></i> Nehum item encontrado</td>
+            </tr>
             <tr v-for="item,index in grupos" :key="index">
-                <th scope="row">\{{item.id}}</th>
+                <td>\{{item.id}}</td>
                 <td>\{{item.data?item.data.split("T")[0].split("-").reverse().join("/"):""}}</td>
                 <td>\{{item.jogo.dinamica.nome}}</td>
                 <td>\{{item.jogo.nome}}</td>
-                <td>\{{item.cliente}}</td>
-                <td>\{{item.monitor}}</td>
-                <td>\{{item?.participantes ? item.participantes.length : 0}} <span
-                        :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">\{{status.find(o=>o.id
-                        ==item.status).descricao}}</span> </td>
+                <td>\{{item.cliente.nome}}</td>
+                <td>\{{item.user?item.user.nome:"---"}}</td>
+                <td>\{{item?.participantes ? item.participantes.length : 0}}
+                    <span :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">
+                        \{{status.find(o=>o.id==item.status).descricao}}
+                    </span>
+                </td>
                 <td>
                     <div class="dropdown">
                         <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -83,13 +91,24 @@
                         <label class="text-capitalize">jogo</label>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control " disabled :value="clientes.find(o=>o.id == novoGrupo.clienteId)?clientes.find(o=>o.id == novoGrupo.clienteId).nome:'' ">
+                    <div class="form-floating mb-3" v-if="userType==0">
+                        <select class="form-select" v-model="novoGrupo.clienteId">
+                            <option selected>Selecione um jogo</option>
+                            <option v-for="item,index in clientes||[]"
+                                :key="index" :value="item.id">\{{item.nome}}</option>
+                        </select>
+                        <label class="text-capitalize">Clientes</label>
+                    </div>
+
+                    <div class="form-floating mb-3" v-else>
+                        <input type="text" class="form-control " disabled
+                            :value="clientes.find(o=>o.id == novoGrupo.clienteId)?clientes.find(o=>o.id == novoGrupo.clienteId).nome:'' ">
                         <label class="text-capitalize">Cliente</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control " disabled v-model="novoGrupo.monitor" value="{{user.nome}}">
+                        <input type="text" class="form-control " disabled v-model="novoGrupo.monitor"
+                            value="{{user.nome}}">
                         <label class="text-capitalize">monitor</label>
                     </div>
 
@@ -98,7 +117,11 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
                             class="bi bi-x-lg"></i>
                         Cancelar</button>
-                    <button type="button" @click="saveGrupo" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                    <button type="button" disabled v-if="salvando" class="btn btn-primary btn-sm">
+                        <i class="bi bi-hourglass-split"></i>
+                        Salvando</button>
+                    <button type="button" @click="saveGrupo" v-else class="btn btn-primary btn-sm"><i
+                            class="bi bi-save"></i>
                         Salvar</button>
                 </div>
             </div>
@@ -114,18 +137,28 @@
             loadingPage: true,
             grupos: [],
             dinamicas: [],
-            novoGrupo: { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}", monitor: "{{user.nome}}" },
+            novoGrupo: { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}" },
             addGrupoModal: {},
-            clientes:[],
+            clientes: [],
             status: [
                 { id: 1, descricao: "Aberto", tag: "primary" },
                 { id: 2, descricao: "Em Analise", tag: "warning" },
                 { id: 3, descricao: "Concluído", tag: "success" },
-            ]
+            ],
+            userType:'{{user.tipo}}',
+            carregando: false,
+            salvando: false,
         },
         methods: {
             async loadPage() {
-                await Promise.all([this.getGrupos(), this.getDinamicas(), this.getClientes()])
+                this.carregando = true;
+                try {
+                    await Promise.all([this.getGrupos(), this.getDinamicas(), this.getClientes()])
+                    this.carregando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.carregando = false;
+                }
             },
             async getGrupos() {
                 const result = await fetch(`/grupos/getAll`)
@@ -143,7 +176,7 @@
                 this.clientes = data;
             },
             async openGrupoModal() {
-                this.novoGrupo = { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}", monitor: "{{user.nome}}" }
+                this.novoGrupo = { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}"}
                 this.addGrupoModal = new bootstrap.Modal('#addGrupo')
                 this.addGrupoModal.show()
             },
@@ -154,7 +187,7 @@
 
                 const result = await fetch(`/grupos/remove/${grupoId}`);
                 if (!result.ok) {
-                    showMessageToast('danger', 'Erro ao executar esta ação!')
+                    showMessageToast('error', 'Erro ao executar esta ação!')
                     return
                 }
                 this.getGrupos();
@@ -163,28 +196,39 @@
 
             },
             async saveGrupo() {
-                let validaResult = validaOjeto(this.novoGrupo);
-
-                if (validaResult.length > 0) {
-                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
-                    return
-                }
-                const result = await fetch(`/grupos/addGrupo`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: this.novoGrupo }),
-                });
-                if (!result.ok) {
-                    showMessageToast('danger', 'Erro ao executar esta ação!')
-                    return
-                }
-                const data = await result.json()
-                await this.getGrupos()
-                this.novoGrupo = {}
+                this.salvando = true;
+                showMessageToast('success', 'Salvando informações!')
                 this.addGrupoModal.hide()
-                showMessageToast('success', 'Grupo adicionado!')
+
+                try {
+                    let validaResult = validaOjeto(this.novoGrupo);
+
+                    if (validaResult.length > 0) {
+                        ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                        this.salvando = false;
+                        return
+                    }
+                    const result = await fetch(`/grupos/addGrupo`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ data: this.novoGrupo }),
+                    });
+                    if (!result.ok) {
+                        showMessageToast('error', 'Erro ao executar esta ação!')
+                        this.salvando = false;
+                        return
+                    }
+                    const data = await result.json()
+                    await this.getGrupos()
+                    this.novoGrupo = {}
+                    showMessageToast('success', 'Grupo adicionado!')
+                    this.salvando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.salvando = false;
+                }
 
             },
 

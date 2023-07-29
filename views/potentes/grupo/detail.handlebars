@@ -1,69 +1,71 @@
 <div id="gruposapp">
-    <div class="card mx-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">Grupo <span
-                        :class="'fs-6 badge text-bg-'+status.find(o=>o.id ==grupo.status)?.tag||'' ">\{{status.find(o=>o.id
-                        ==grupo.status)?.descricao||""}}</span></h2>
-                <div>
-                    <a href="../" class="btn btn-primary" type="button"><i class="bi bi-arrow-left"></i></a>
-                </div>
-            </div>
-            <div><span class="fw-semibold">Data:</span> \{{new Date(grupo.data).toLocaleDateString()}}</div>
-            <div><span class="fw-semibold">Dinamica:</span> \{{grupo.jogo?.dinamica ? grupo.jogo.dinamica.nome:""}}
-            </div>
-            <div><span class="fw-semibold">Jogo:</span> \{{grupo.jogo?.nome||""}}</div>
-            <div><span class="fw-semibold">Cliente:</span> \{{grupo.cliente||""}}</div>
-            <div><span class="fw-semibold">Monitor:</span> \{{grupo.monitor||""}}</div>
-        </div>
-    </div>
-    <div class="card m-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">Participantes</h2>
-                <div>
-                    <button @click="openParicipanteModal()" type="button" class="btn btn-primary btn-sm"><i
-                            class="bi bi-plus"></i>
-                        Participante</button>
-                </div>
-            </div>
-            <table class="table mt-2">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Respostas</th>
-                        <th style="width: 1%" scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item,index in grupo.participantes" :key="index">
-                        <th scope="row">\{{index+1}}</th>
-                        <td>\{{item.nome||""}}</td>
-                        <td>\{{item.email||""}}</td>
-                        <td>\{{item?.resposta ? item.resposta.length : 0}}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a :href="'/participantes/detail/'+item.id" class="dropdown-item"
-                                            type="button"><i class="bi bi-clipboard-data"></i>
-                                            Analise</a></li>
-                                    <li><button @click="removeParticipante(item.id)" class="dropdown-item text-danger"
-                                            type="button"><i class="bi bi-trash"></i> Remover</button>
-                                    </li>
-                                </ul>
-                            </div>
 
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Grupo <span
+                :class="'fs-6 badge text-bg-'+status.find(o=>o.id ==grupo.status)?.tag||'' ">\{{status.find(o=>o.id
+                ==grupo.status)?.descricao||""}}</span></h2>
+        <div>
+            <a href="../" class="btn btn-outline-primary" type="button"><i class="bi bi-arrow-left"></i></a>
         </div>
     </div>
+    <div><span class="fw-semibold">Data:</span> \{{grupo?.data?new Date(grupo.data).toLocaleDateString():""}}</div>
+    <div><span class="fw-semibold">Dinamica:</span> \{{grupo.jogo?.dinamica ? grupo.jogo.dinamica.nome:""}}
+    </div>
+    <div><span class="fw-semibold">Jogo:</span> \{{grupo.jogo?.nome||""}}</div>
+    <div><span class="fw-semibold">Cliente:</span> \{{grupo.cliente? grupo.cliente?.nome:""}}</div>
+    <div><span class="fw-semibold">Monitor:</span> \{{grupo.user?grupo.user.nome:""}}</div>
+    <div v-if="grupo.status>1"><span class="fw-semibold">Duração:</span> \{{grupo.duracao}}</div>
+    <hr>
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h4 class="me-md-2">Lista Participantes</h4>
+        <div>
+            <button @click="openParicipanteModal()" type="button" class="btn btn-primary btn-sm"><i
+                    class="bi bi-plus"></i>
+                Participante</button>
+        </div>
+    </div>
+    <table class="table mt-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Email</th>
+                <th scope="col">Respostas</th>
+                <th style="width: 1%" scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-if="carregando">
+                <td colspan="8" class="text-center"><i class="bi bi-search"></i> ...Carregando lista</td>
+            </tr>
+            <tr v-else-if="!carregando && grupo?.participantes?.length==0">
+                <td colspan="8" class="text-center"><i class="bi bi-database-x"></i> Nehum item encontrado</td>
+            </tr>
+            <tr v-for="item,index in grupo.participantes" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.nome||""}}</td>
+                <td>\{{item.email||""}}</td>
+                <td>\{{item?.resposta ? item.resposta.length : 0}}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a :href="'/participantes/detail/'+item.id" class="dropdown-item" type="button"><i
+                                        class="bi bi-clipboard-data"></i>
+                                    Analise</a></li>
+                            <li><button @click="removeParticipante(item.id)" class="dropdown-item text-danger"
+                                    type="button"><i class="bi bi-trash"></i> Remover</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
 
     <div class="d-grid gap-2 m-4">
         <a href="/desafios/emgrupo/{{grupoId}}" type="button"
@@ -95,7 +97,10 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
                             class="bi bi-x-lg"></i>
                         Cancelar</button>
-                    <button type="button" @click="saveParticipante" class="btn btn-primary btn-sm"><i
+                    <button type="button" disabled v-if="salvando" class="btn btn-primary btn-sm">
+                        <i class="bi bi-hourglass-split"></i>
+                        Salvando</button>
+                    <button type="button" @click="saveParticipante" v-else class="btn btn-primary btn-sm"><i
                             class="bi bi-save"></i>
                         Salvar</button>
                 </div>
@@ -118,14 +123,27 @@
                 { id: 1, descricao: "Aberto", tag: "primary" },
                 { id: 2, descricao: "Em Analise", tag: "warning" },
                 { id: 3, descricao: "Concluído", tag: "success" },
-            ]
-
+            ],
+            carregando: false,
+            salvando: false
         },
         methods: {
             async loadPage() {
-                const result = await fetch(`/grupos/getOne/{{grupoId}}`)
-                const data = await result.json()
-                this.grupo = data;
+                this.carregando = true;
+                try {
+                    const result = await fetch(`/grupos/getOne/{{grupoId}}`)
+                    const data = await result.json()
+                    this.grupo = data;
+
+                    if (this.grupo.status > 1) {
+                        this.grupo.duracao = await this.calcularDuracao(this.grupo.inicio,this.grupo.termino);
+                    }
+
+                    this.carregando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.carregando = false;
+                }
             },
             async openParicipanteModal() {
                 this.participante = { nome: "", email: "" }
@@ -133,29 +151,39 @@
                 this.addParticipanteModal.show()
             },
             async saveParticipante() {
-                let validaResult = validaOjeto(this.participante);
-
-                if (validaResult.length > 0) {
-                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
-                    return
-                }
-
-                const result = await fetch(`/participantes/add/{{grupoId}}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: this.participante }),
-                });
-                if (!result.ok) {
-                    showMessageToast('danger', 'operação não pode ser executada!')
-                    return
-                }
-                const data = await result.json()
-                await this.loadPage();
-                this.participante = {}
+                this.salvando = true;
+                showMessageToast('success', 'Salvando informações!')
                 this.addParticipanteModal.hide()
-                showMessageToast('success', 'participante adicionado!')
+                try {
+                    let validaResult = validaOjeto(this.participante);
+
+                    if (validaResult.length > 0) {
+                        ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                        this.salvando = false;
+                        return
+                    }
+
+                    const result = await fetch(`/participantes/add/{{grupoId}}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ data: this.participante }),
+                    });
+                    if (!result.ok) {
+                        showMessageToast('error', 'operação não pode ser executada!')
+                        this.salvando = false;
+                        return
+                    }
+                    const data = await result.json()
+                    await this.loadPage();
+                    this.participante = {}
+                    showMessageToast('success', 'participante adicionado!')
+                    this.salvando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.salvando = false;
+                }
 
 
             },
@@ -171,11 +199,23 @@
 
                 const result = await fetch(`/participantes/remove/${this.grupo.id}/${id}`);
                 if (!result.ok) {
-                    showMessageToast('danger', 'operação não pode ser executada!')
+                    showMessageToast('error', 'operação não pode ser executada!')
                     return
                 } this.loadPage();
                 showMessageToast('success', 'participante removido!')
 
+            },
+            async calcularDuracao(inicio, termino) {
+                const inicioDate = new Date(inicio);
+                const terminoDate = new Date(termino);
+
+                const diferencaEmMilissegundos = terminoDate - inicioDate;
+
+                const horas = Math.floor(diferencaEmMilissegundos / 3600000);
+                const minutos = Math.floor((diferencaEmMilissegundos % 3600000) / 60000);
+                const segundos = Math.floor((diferencaEmMilissegundos % 60000) / 1000);
+
+                return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
             },
 
         },

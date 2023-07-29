@@ -1,60 +1,63 @@
 <div id="jogosapp">
-    <div class="card mx-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
-                <h2 class="me-md-2">jogo</h2>
-                <div>
-                    <a :href="'/admin/dinamicas/detail/'+jogo.dinamicaId" class="btn btn-primary" type="button"><i
-                            class="bi bi-arrow-left"></i></a>
-                </div>
-            </div>
-            <div><span class="fw-semibold">Nome:</span> \{{jogo.nome}}</div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
+        <h2 class="me-md-2">Jogo</h2>
+        <div>
+            <a :href="'/admin/dinamicas/detail/'+jogo.dinamicaId" class="btn btn-primary" type="button"><i
+                    class="bi bi-arrow-left"></i></a>
         </div>
     </div>
-    <div class="card m-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-                <h3 class="me-md-2">Desafios</h3>
-                <div>
-                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
-                            class="bi bi-file-earmark-plus"></i>
-                    </button>
-                </div>
-            </div>
-            <table class="table mt-2">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Título</th>
-                        <th scope="col">Descrição</th>
-                        <th style="width: 1%" scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item,index in jogo.desafios" :key="index">
-                        <th scope="row">\{{index+1}}</th>
-                        <td>\{{item.titulo}}</td>
-                        <td>\{{item.descricao}}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
-                                                class="bi bi-eye"></i>
-                                            Visualisar</button></li>
-                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
-                                            type="button"><i class="bi bi-trash"></i> Remover</button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div><span class="fw-semibold">Nome:</span> \{{jogo.nome}}</div>
+
+    <hr>
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h4 class="me-md-2">Lista de Desafios</h4>
+        <div>
+            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                    class="bi bi-file-earmark-plus"></i>
+            </button>
         </div>
     </div>
+    <table class="table mt-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Título</th>
+                <th scope="col">Descrição</th>
+                <th style="width: 1%" scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-if="carregando">
+                <td colspan="8" class="text-center"><i class="bi bi-search"></i> ...Carregando lista</td>
+            </tr>
+            <tr v-else-if="!carregando && jogo?.desafios?.length==0">
+                <td colspan="8" class="text-center"><i class="bi bi-database-x"></i> Nehum item encontrado</td>
+            </tr>
+            <tr v-for="item,index in jogo.desafios" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.titulo}}</td>
+                <td>\{{item.descricao}}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
+                                        class="bi bi-eye"></i>
+                                    Visualisar</button></li>
+                            <li><button @click="remove(item.id)" class="dropdown-item text-danger" type="button"><i
+                                        class="bi bi-trash"></i> Remover</button>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
 
     <!-- Modal -->
     <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -110,13 +113,21 @@
             },
             addModal: {},
             action: "",
-
+            carregando: false
         },
         methods: {
             async loadPage() {
-                const result = await fetch(`/admin/jogos/getOne/{{data.id}}`)
-                const data = await result.json()
-                this.jogo = data;
+
+                this.carregando = true;
+                try {
+                    const result = await fetch(`/admin/jogos/getOne/{{data.id}}`)
+                    const data = await result.json()
+                    this.jogo = data;
+                    this.carregando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.carregando = false;
+                }
             },
             async openAddModal() {
                 this.action = "add";

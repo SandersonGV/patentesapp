@@ -1,52 +1,54 @@
 <div id="clientesapp">
-    <div class="card m-4">
-        <div class="card-body">
-            <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
-                <h3 class="me-md-2">Usuarios</h3>
-                <div>
-                    <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
-                            class="bi bi-file-earmark-plus"></i>
-                    </button>
-                </div>
-            </div>
-            <table class="table mt-2">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Nome</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Cliente</th>
-                        <th style="width: 1%" scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item,index in usuarios" :key="index">
-                        <th scope="row">\{{index+1}}</th>
-                        <td>\{{item.nome}}</td>
-                        <td>\{{item.email}}</td>
-                        <td>\{{item.tipo}}</td>
-                        <td>\{{item?.cliente ?item.cliente.nome:""}}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
-                                                class="bi bi-eye"></i>
-                                            Visualisar</button></li>
-                                    <li><button @click="remove(item.id)" class="dropdown-item text-danger"
-                                            type="button"><i class="bi bi-trash"></i> Remover</button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="d-grid gap-2 mt-2 d-md-flex justify-content-between align-items-center">
+        <h3 class="me-md-2">Usuarios</h3>
+        <div>
+            <button @click="openAddModal()" type="button" class="btn btn-primary btn-sm"><i
+                    class="bi bi-file-earmark-plus"></i>
+            </button>
         </div>
     </div>
+    <table class="table mt-2">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Email</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Cliente</th>
+                <th style="width: 1%" scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-if="carregando">
+                <td colspan="8" class="text-center"><i class="bi bi-search"></i> ...Carregando lista</td>
+            </tr>
+            <tr v-else-if="!carregando && usuarios.length==0">
+                <td colspan="8" class="text-center"><i class="bi bi-database-x"></i> Nehum item encontrado</td>
+            </tr>
+            <tr v-for="item,index in usuarios" :key="index">
+                <th scope="row">\{{index+1}}</th>
+                <td>\{{item.nome}}</td>
+                <td>\{{item.email}}</td>
+                <td>\{{item.tipo}}</td>
+                <td>\{{item?.cliente ?item.cliente.nome:""}}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><button @click="openEditModal(item.id)" class="dropdown-item" type="button"><i
+                                        class="bi bi-eye"></i>
+                                    Visualisar</button></li>
+                            <li><button @click="remove(item.id)" class="dropdown-item text-danger" type="button"><i
+                                        class="bi bi-trash"></i> Remover</button>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <!-- Modal -->
     <div class="modal fade" id="adModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -93,7 +95,10 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
                             class="bi bi-x-lg"></i>
                         Cancelar</button>
-                    <button type="button" @click="save" class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
+                    <button type="button" disabled v-if="salvando" class="btn btn-primary btn-sm">
+                        <i class="bi bi-hourglass-split"></i>
+                        Salvando</button>
+                    <button type="button" @click="save" v-else class="btn btn-primary btn-sm"><i class="bi bi-save"></i>
                         Salvar</button>
                 </div>
             </div>
@@ -117,10 +122,19 @@
             usuario: {},
             addModal: {},
             action: "",
+            carregando: false,
+            salvando: false
         },
         methods: {
             async loadPage() {
-                await Promise.all([await this.loadClientes(), await this.loadUsuarios()])
+                this.carregando = true;
+                try {
+                    await Promise.all([await this.loadClientes(), await this.loadUsuarios()])
+                    this.carregando = false;
+                } catch (e) {
+                    console.log(e)
+                    this.carregando = false;
+                }
             },
             async loadClientes() {
                 const result = await fetch(`/admin/clientes/getAll`)
@@ -145,30 +159,45 @@
                 this.addModal.show()
             },
             async save() {
-                let validaResult = validaOjeto(this.cliente);
-                if (validaResult.length > 0) {
-                    ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
-                    return
-                }
+                try {
+                    this.salvando = true;
+                    showMessageToast('success', 'Salvando informações!')
+                    this.addModal.hide()
 
-                let url = `/admin/usuarios/add`
-                if (this.action == 'edit') {
-                    url = `/admin/usuarios/edit/${this.cliente.id}`
-                }
-                let payload = { ... this.usuario }
-                const result = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ ...payload }),
-                });
-                if (result.ok) {
+                    let validaResult = validaOjeto(this.cliente);
+                    if (validaResult.length > 0) {
+                        ShowMessage("warning", "Campos obrigatórios", validaResult.join("<br>"))
+                        this.salvando = false;
+                        return
+                    }
+
+                    let url = `/admin/usuarios/add`
+                    if (this.action == 'edit') {
+                        url = `/admin/usuarios/edit/${this.cliente.id}`
+                    }
+                    let payload = { ... this.usuario }
+                    const result = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ ...payload }),
+                    });
+                    if (!result.ok) {
+                        showMessageToast('error', 'Erro ao executar esta ação!')
+                        this.salvando = false;
+                        return
+                    } 
                     const data = await result.json()
                     this.loadPage();
                     this.usuario = {}
                     this.addModal.hide()
                     showMessageToast('success', 'item adicionado!')
+                    this.salvando = false;
+
+                } catch (e) {
+                    console.log(e)
+                    this.salvando = false;
                 }
             },
             async remove(id) {
