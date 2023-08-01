@@ -55,8 +55,9 @@ router.post('/trylogin', async (req, res, next) => {
     return res.status(200).json(result)
 
   } catch (error) {
-    error.statusCode = error.response.status || 500
-    error.message = error.response.statusText || ""
+    console.log(error)
+    error.statusCode = error.response ? error.response.status : 500
+    error.message = error.response ? error.response.statusText : ""
     next(error)
   }
 });
