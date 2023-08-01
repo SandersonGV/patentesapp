@@ -42,7 +42,7 @@ router.post('/trylogin', async (req, res, next) => {
     });
 
     if (usuario.tipo == 0) {
-      result.redirect = "/admin/dashboard"
+      result.redirect = "admin/dashboard"
     }
 
     result.user = {
@@ -51,11 +51,12 @@ router.post('/trylogin', async (req, res, next) => {
       tipo: usuario.tipo,
       clienteId: usuario.clienteId
     }
+    console.log(result)
+    return res.status(200).json(result)
 
-    return res.status(200).send(result)
   } catch (error) {
-    error.statusCode = error.response.status
-    error.message = error.response.statusText
+    error.statusCode = error.response.status || 500
+    error.message = error.response.statusText || ""
     next(error)
   }
 });
