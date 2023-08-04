@@ -1,0 +1,57 @@
+body {
+  background: radial-gradient(black 15%, transparent 16%) 0 0,
+    radial-gradient(black 15%, transparent 16%) 8px 8px,
+    radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 20%) 0 1px,
+    radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 20%) 8px 9px;
+  background-color: #282828;
+  background-size: 16px 16px;
+  height: 100vh; 
+  width: 100vw;
+
+}
+
+.site-container {
+  display: grid;
+  grid-template-columns: 0.4fr 1.6fr;
+  grid-template-rows: 0.2fr 2.7fr 0.1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "topArea topArea"
+    "menuArea contentArea"
+    "footerArea footerArea";
+  height: 100%;
+  width: 100%;
+
+}
+
+.contentArea {
+  grid-area: contentArea;
+}
+
+.menuArea {
+  grid-area: menuArea;
+}
+
+.topArea {
+  grid-area: topArea;
+}
+
+.footerArea {
+  grid-area: footerArea;
+}
+
+.loadingBar {
+  width:120px;
+  height:24px;
+  -webkit-mask:
+    radial-gradient(circle closest-side,#000 94%,#0000) 0 0/25% 100%,
+    linear-gradient(#000 0 0) center/calc(100% - 12px) calc(100% - 12px) no-repeat;
+  background:
+   linear-gradient(#25b09b 0 0) 0/0% no-repeat
+   #ddd;
+  animation:lBar 2s infinite linear;
+}
+@keyframes lBar {
+    100% {background-size:100%}
+}

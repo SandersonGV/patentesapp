@@ -18,6 +18,7 @@ const userAuth = (req, res, next) => {
                 }
                 res.locals.menu = menu;
                 res.locals.user = decodedToken;
+                res.locals.user.isAdmin = decodedToken.tipo==1;
 
                 if (!tipoUser.includes(decodedToken.tipo) || req.originalUrl == "/") {
                     let redirect = "/clientes"

@@ -2,7 +2,8 @@
     <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
         <h2 class="me-md-2">Lista de Grupos</h2>
         <div>
-            <button @click="openGrupoModal()" type="button" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i>
+            <button @click="openGrupoModal()" type="button" class="btn btn-outline-primary btn-sm"><i
+                    class="bi bi-plus"></i>
                 Grupo</button>
         </div>
     </div>
@@ -35,7 +36,7 @@
                 <td>\{{item.cliente.nome}}</td>
                 <td>\{{item.user?item.user.nome:"---"}}</td>
                 <td>\{{item?.participantes ? item.participantes.length : 0}}
-                    <span :class="'badge text-bg-'+status.find(o=>o.id ==item.status).tag">
+                    <span :class="'badge bg-'+status.find(o=>o.id ==item.status).tag">
                         \{{status.find(o=>o.id==item.status).descricao}}
                     </span>
                 </td>
@@ -62,54 +63,54 @@
     <div class="modal fade" id="addGrupo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content bg-secondary">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="staticBackdropLabel">Novo grupo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-floating mb-3">
-                        <input type="date" class="form-control" v-model="novoGrupo.data">
+                    <div class=" mb-3">
                         <label class="text-capitalize">data</label>
+                        <vuejs-datepicker   :language="vdp_translation_index.ptBR" format="dd/MM/yyyy" input-class="form-control" v-model="novoGrupo.data"></vuejs-datepicker>
                     </div>
 
-                    <div class="form-floating mb-3">
+                    <div class=" mb-3">
+                        <label class="text-capitalize">dinamica</label>
                         <select class="form-select" v-model="novoGrupo.dinamicaId">
                             <option selected>Selecione um dinamica</option>
                             <option v-for="item,index in dinamicas" :key="index" :value="item.id">\{{item.nome}}
                             </option>
                         </select>
-                        <label class="text-capitalize">dinamica</label>
                     </div>
 
-                    <div class="form-floating mb-3">
+                    <div class=" mb-3">
+                        <label class="text-capitalize">jogo</label>
                         <select class="form-select" v-model="novoGrupo.jogoId">
                             <option selected>Selecione um jogo</option>
                             <option v-for="item,index in dinamicas.find(o => o.id == novoGrupo.dinamicaId)?.jogos||[]"
                                 :key="index" :value="item.id">\{{item.nome}}</option>
                         </select>
-                        <label class="text-capitalize">jogo</label>
                     </div>
 
-                    <div class="form-floating mb-3" v-if="userType==0">
+                    <div class=" mb-3" v-if="userType==0">
+                        <label class="text-capitalize">Clientes</label>
                         <select class="form-select" v-model="novoGrupo.clienteId">
                             <option selected>Selecione um jogo</option>
-                            <option v-for="item,index in clientes||[]"
-                                :key="index" :value="item.id">\{{item.nome}}</option>
+                            <option v-for="item,index in clientes||[]" :key="index" :value="item.id">\{{item.nome}}
+                            </option>
                         </select>
-                        <label class="text-capitalize">Clientes</label>
                     </div>
 
-                    <div class="form-floating mb-3" v-else>
+                    <div class=" mb-3" v-else>
+                        <label class="text-capitalize">Cliente</label>
                         <input type="text" class="form-control " disabled
                             :value="clientes.find(o=>o.id == novoGrupo.clienteId)?clientes.find(o=>o.id == novoGrupo.clienteId).nome:'' ">
-                        <label class="text-capitalize">Cliente</label>
                     </div>
 
-                    <div class="form-floating mb-3">
+                    <div class="mb-3">
+                        <label class="text-capitalize">monitor</label>
                         <input type="text" class="form-control " disabled v-model="novoGrupo.monitor"
                             value="{{user.nome}}">
-                        <label class="text-capitalize">monitor</label>
                     </div>
 
                 </div>
@@ -129,10 +130,14 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/vuejs-datepicker"></script>
+<script src="https://unpkg.com/vuejs-datepicker@1.6.2/dist/locale"></script>
 <script>
-
     var app = new Vue({
         el: '#gruposapp',
+        components: {
+            vuejsDatepicker
+        },
         data: {
             loadingPage: true,
             grupos: [],
@@ -145,7 +150,7 @@
                 { id: 2, descricao: "Em Analise", tag: "warning" },
                 { id: 3, descricao: "Concluído", tag: "success" },
             ],
-            userType:'{{user.tipo}}',
+            userType: '{{user.tipo}}',
             carregando: false,
             salvando: false,
         },
@@ -176,7 +181,7 @@
                 this.clientes = data;
             },
             async openGrupoModal() {
-                this.novoGrupo = { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}"}
+                this.novoGrupo = { data: "", dinamica: "", jogo: "", clienteId: "{{user.clienteId}}" }
                 this.addGrupoModal = new bootstrap.Modal('#addGrupo')
                 this.addGrupoModal.show()
             },

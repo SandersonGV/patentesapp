@@ -2,7 +2,7 @@
 
     <div class="d-grid gap-2 d-md-flex justify-content-between align-items-center">
         <h2 class="me-md-2">Grupo <span
-                :class="'fs-6 badge text-bg-'+status.find(o=>o.id ==grupo.status)?.tag||'' ">\{{status.find(o=>o.id
+                :class="'fs-6 badge bg-'+status.find(o=>o.id ==grupo.status)?.tag||'' ">\{{status.find(o=>o.id
                 ==grupo.status)?.descricao||""}}</span></h2>
         <div>
             <a href="../" class="btn btn-outline-primary" type="button"><i class="bi bi-arrow-left"></i></a>
@@ -76,7 +76,7 @@
     <div class="modal fade" id="addParticipante" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content bg-secondary">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5 text-capitalize" id="staticBackdropLabel">incluir participante</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

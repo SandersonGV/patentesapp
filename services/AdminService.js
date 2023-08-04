@@ -5,8 +5,12 @@ const apiService = new ApiService(POTENTES_API_URL)
 
 class AdminService {
     trylogin = async (item) => {
-        const usuario = await apiService.post(`/users/trylogin`, item)
-        return usuario.content
+        try {
+            const usuario = await apiService.post(`/users/trylogin`, item)
+            return usuario.content
+        } catch (error) {
+            console.log(error)
+        }
     }
 }
 
