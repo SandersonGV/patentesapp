@@ -58,7 +58,13 @@ router.get('/getOne/:grupoId', async (req, res, next) => {
 
 router.get('/getAll', async (req, res, next) => {
   try {
-    let data = await GrupoService.getAll();
+    let q=""
+    if(res.locals.user){
+      if(res.locals.user?.clienteId!=""){
+        q = {clienteId: res.locals.user?.clienteId}
+      }
+    }
+    let data = await GrupoService.getAll(q);
     res.json(data)
     
   } catch (error) {

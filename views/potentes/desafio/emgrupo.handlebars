@@ -15,14 +15,14 @@
         </div>
     </div>
     <div class="mb-3" v-for="item,idx in desafioList" :key="idx" v-show="idx==currentStep">
-        <div class="card mx-4">
+        <div class="card bg-light mx-4">
             <div class="card-body">
                 <h3 class="card-title fs-3">\{{item.titulo}}</h3>
                 <span class="fst-italic card-text">\{{item.descricao}}</span>
             </div>
         </div>
 
-        <div class="card m-4" v-for="participante,idx3 in participantes" :key="idx3">
+        <div class="card bg-light m-4" v-for="participante,idx3 in participantes" :key="idx3">
             <div class="card-body">
                 <h5 class="card-title"><i class="bi bi-person-circle"></i><span class="text-capitalize">
                         \{{participante.nome}}</span></h5>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="d-flex gap-2 m-4">
-            <button :disabled="currentStep==0" class="btn btn-warning btn-sm flex-fill" type="button"
+            <button :disabled="currentStep==0 || enviando" class="btn btn-warning btn-sm flex-fill" type="button"
                 @click="anteriorDesafio"><i class="bi bi-arrow-left"></i> Anterior</button>
             <button v-if="currentStep==desafioList.length-1" :disabled="enviando"
                 class="btn btn-success btn-sm flex-fill" type="button" @click="enviarResposta"><i
@@ -190,8 +190,8 @@
                         return
                     }
 
-                    //this.dataResposta.delete(1);
-                    //location.replace("/grupos/detail/{{grupoId}}")
+                    this.dataResposta.delete(1);
+                    location.replace("/grupos/detail/{{grupoId}}")
 
             } catch(e) {
                 console.log(e)

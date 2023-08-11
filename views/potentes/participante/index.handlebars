@@ -21,7 +21,7 @@
             <div class="ms-2 me-auto">
                 <div class="fw-bold">\{{item.sigla+" - "+item.titulo}}</div>
                 <ul>
-                    <li v-for="listitem,idx in item.texto[Math.floor(percentualLetra[item.id]/25)||0]" :key="idx">
+                    <li v-for="listitem,idx in item.texto[Math.floor(percentualLetra[item.id]/25)-1||0]" :key="idx">
                         \{{listitem}}
                     </li>
                 </ul>

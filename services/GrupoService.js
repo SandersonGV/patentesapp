@@ -4,8 +4,8 @@ require('dotenv').config()
 const {POTENTES_API_URL} = process.env
 const apiService = new ApiService(POTENTES_API_URL)
 class GrupoService {
-    getAll = async () => {
-        const items = await apiService.get("/grupos")
+    getAll = async (q) => {
+        const items = await apiService.get("/grupos",q)
         return [...items.content];
     }
     
