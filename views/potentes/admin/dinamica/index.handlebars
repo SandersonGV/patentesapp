@@ -27,18 +27,11 @@
                 <th scope="row">\{{index+1}}</th>
                 <td>\{{item.nome}}</td>
                 <td>
-                    <div class="dropdown">
-                        <button class="btn " type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a :href="'/admin/dinamicas/detail/'+item.id" class="dropdown-item" type="button"><i
-                                        class="bi bi-eye"></i>
-                                    Visualisar</a></li>
-                            <li><button @click="remove(item.id)" class="dropdown-item text-danger" type="button"><i
-                                        class="bi bi-trash"></i> Remover</button>
-                            </li>
-                        </ul>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
+                        <a type="button" :href="'/admin/dinamicas/detail/'+item.id" class="btn btn-outline-info"
+                            title="Visualisar"><i class="bi bi-eye"></i></a>
+                        <button type="button" @click="remove(item.id)" class="btn btn-outline-danger"
+                            title="Remover"><i class="bi bi-trash"></i></button>
                     </div>
                 </td>
             </tr>

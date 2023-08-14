@@ -51,7 +51,6 @@ router.post('/trylogin', async (req, res, next) => {
       tipo: usuario.tipo,
       clienteId: usuario.clienteId
     }
-    console.log(result)
     return res.status(200).json(result)
 
   } catch (error) {

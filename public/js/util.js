@@ -48,3 +48,26 @@ function validaOjeto(objeto) {
     }
     return propriedadesVazias;
 }
+
+
+const validateObjects = 
+    {
+        grupo: {
+            props: [
+                {
+                    name: "",
+                    type: Number,
+                    required: false
+                }
+            ]
+        },
+        dinamica: {
+            props: [
+                {
+                    name: "",
+                    type: Number,
+                    required: false
+                }
+            ]
+        },
+    }
